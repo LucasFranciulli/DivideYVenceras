@@ -33,7 +33,7 @@ export const LoginScreen = ({navigation}) => {
   const onLogin = () => {
     if (username === 'test' && password === '1234') {
       showToastSuccess();
-      navigation.navigate('HomeScreen');
+      navigation.navigate('BottomTabsHomeNavigator');
     } else {
       console.log('Usuario y contraseña incorrectos');
       showToastError();

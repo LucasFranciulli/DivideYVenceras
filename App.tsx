@@ -8,6 +8,7 @@ import {LoginScreen} from './src/screens/login/LoginScreen';
 import {RegisterScreen} from './src/screens/register/RegisterScreen';
 import {HomeScreen} from './src/screens/home/HomeScreen';
 import Toast from 'react-native-toast-message';
+import { BottomTabsHomeNavigator } from './src/navigation/BottomHomeTabsNavigation';
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -36,6 +37,13 @@ function App(): React.JSX.Element {
           <Stack.Screen
             name="HomeScreen"
             component={HomeScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="BottomTabsHomeNavigator"
+            component={BottomTabsHomeNavigator}
             options={{
               headerShown: false,
             }}
