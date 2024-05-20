@@ -1,14 +1,33 @@
-import React, {useState} from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
-import {Button, Checkbox, Text, TextInput} from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Button, Checkbox, Text, TextInput } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const LoginScreen = ({navigation}) => {
+export const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [hidePassword, setHidePassword] = useState(true);
   const [rememberPassword, setRememberPassword] = useState(false);
+
+  useEffect(() => {
+    const checkStoredCredentials = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        const storedPassword = await AsyncStorage.getItem('password');
+        if (storedUsername && storedPassword) {
+          setUsername(storedUsername);
+          setPassword(storedPassword);
+          onLogin(storedUsername, storedPassword, true);
+        }
+      } catch (e) {
+        console.error('Failed to load credentials', e);
+      }
+    };
+
+    checkStoredCredentials();
+  }, []);
 
   const handleHidePassword = () => {
     setHidePassword(!hidePassword);
@@ -30,14 +49,28 @@ export const LoginScreen = ({navigation}) => {
     });
   };
 
-  const onLogin = () => {
-    if (username === 'test' && password === '1234') {
+  const onLogin = async (inputUsername: string, inputPassword: string, skipSave = false) => {
+    const usernameToCheck = inputUsername || username;
+    const passwordToCheck = inputPassword || password;
+
+    if (usernameToCheck === 'test' && passwordToCheck === '1234') {
       showToastSuccess();
+      if (rememberPassword && !skipSave) {
+        try {
+          await AsyncStorage.setItem('username', usernameToCheck);
+          await AsyncStorage.setItem('password', passwordToCheck);
+        } catch (e) {
+          console.error('Failed to save credentials', e);
+        }
+      }
       navigation.navigate('BottomTabsHomeNavigator');
     } else {
-      console.log('Usuario y contraseña incorrectos');
       showToastError();
     }
+  };
+
+  const handleLogin = () => {
+    onLogin(username, password);
   };
 
   return (
@@ -99,7 +132,7 @@ export const LoginScreen = ({navigation}) => {
           </View>
         </View>
         <View style={styles.lowerContainers}>
-          <Button mode="contained" onPress={onLogin} style={styles.button}>
+          <Button mode="contained" onPress={handleLogin} style={styles.button}>
             Iniciar sesión
           </Button>
         </View>
