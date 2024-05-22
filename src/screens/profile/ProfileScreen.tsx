@@ -79,27 +79,37 @@ export const ProfileScreen = () => {
         <Text variant="displayLarge" style={styles.title}>
           Lista de Gastos
         </Text>
-        <Icon name={'log-out-outline'} size={40} onPress={() => navigation.navigate('LoginScreen')}/>
+        <Icon
+          name={'log-out-outline'}
+          size={40}
+          onPress={() => navigation.navigate('LoginScreen')}
+        />
       </View>
-      <View style={styles.circleContainer}>
-        <View style={styles.circleContainerItem}>
-          <View style={styles.circleFixed} />
-          <Text variant="titleLarge" style={styles.circleText}>
-            Gasto Fijo
-          </Text>
-        </View>
-        <View style={styles.circleContainerItem}>
-          <View style={styles.circleNotFixed} />
-          <Text variant="titleLarge" style={styles.circleText}>
-            Gasto Normal
-          </Text>
-        </View>
-      </View>
-      <FlatList
-        data={expenses}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-      />
+      {expenses.length === 0 ? (
+        <Text style={styles.noDataText}>No hay gastos.</Text>
+      ) : (
+        <>
+          <View style={styles.circleContainer}>
+            <View style={styles.circleContainerItem}>
+              <View style={styles.circleFixed} />
+              <Text variant="titleLarge" style={styles.circleText}>
+                Gasto Fijo
+              </Text>
+            </View>
+            <View style={styles.circleContainerItem}>
+              <View style={styles.circleNotFixed} />
+              <Text variant="titleLarge" style={styles.circleText}>
+                Gasto Normal
+              </Text>
+            </View>
+          </View>
+          <FlatList
+            data={expenses}
+            renderItem={renderItem}
+            keyExtractor={item => item.id.toString()}
+          />
+        </>
+      )}
     </View>
   );
 };
@@ -163,5 +173,11 @@ const styles = StyleSheet.create({
   },
   circleText: {
     color: globalColors.primary,
+  },
+  noDataText: {
+    alignSelf: 'center',
+    marginTop: 20,
+    fontSize: 18,
+    color: '#666',
   },
 });

@@ -40,8 +40,6 @@ export const ExpenseCard = ({
     }
   };
 
-  console.log('item.isFixed: ', item.isFixed);
-
   return (
     <View
       style={[
@@ -66,6 +64,18 @@ export const ExpenseCard = ({
             <Text variant="titleLarge">Monto: </Text>
             <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
               ${item.amount}
+            </Text>
+          </View>
+          <View style={styles.itemDataRowContainer}>
+            <Text variant="titleLarge">Categoría: </Text>
+            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+              {item.category}
+            </Text>
+          </View>
+          <View style={styles.itemDataRowContainer}>
+            <Text variant="titleLarge">Tag: </Text>
+            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+              {item.tag}
             </Text>
           </View>
         </View>
@@ -101,7 +111,6 @@ export const ExpenseCard = ({
       <Button
         style={item.isFixed ? styles.buttonFixed : styles.button}
         textColor={item.isFixed ? globalColors.dark : globalColors.background}
-        /* onPress={() => deleteExpense(item.id)} */
         onPress={showModalFinished}>
         Completar pago
       </Button>
@@ -148,7 +157,7 @@ const styles = StyleSheet.create({
     borderColor: globalColors.secondary,
   },
   button: {
-    backgroundColor: globalColors.primary,
+    backgroundColor: globalColors.secondary,
   },
   buttonFixed: {
     backgroundColor: globalColors.background,

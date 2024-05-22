@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Checkbox, Text, TextInput} from 'react-native-paper';
 import {RootStackParamList} from '../../../App';
 import {RouteProp, useRoute} from '@react-navigation/native';
@@ -7,6 +7,7 @@ import {globalColors} from '../../themes/theme';
 import {Expense} from '../../utils/Expense';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import DropDown from 'react-native-paper-dropdown';
 
 type EditExpensesScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -17,15 +18,18 @@ export const EditExpensesScreen = () => {
   const route = useRoute<EditExpensesScreenRouteProp>();
   const {item, navigation} = route.params;
   const [expense, setExpense] = useState<Expense>({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      amount: item.amount,
-      expirationDate: item.expirationDate,
-      category: item.category,
-      isFixed: item.isFixed,
-    });
-    const [checked, setChecked] = React.useState(item.isFixed);
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    amount: item.amount,
+    expirationDate: item.expirationDate,
+    category: item.category,
+    isFixed: item.isFixed,
+  });
+  const [checked, setChecked] = React.useState(item.isFixed);
+  const [showDropDown, setShowDropDown] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState(item.category);
+  const [categoriesList, setCategoriesList] = useState([]);
 
   const showToastError = (message: string) => {
     Toast.show({
@@ -66,13 +70,28 @@ export const EditExpensesScreen = () => {
     }
   };
 
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const storedCategories = await AsyncStorage.getItem('categories');
+        if (storedCategories) {
+          setCategoriesList(JSON.parse(storedCategories));
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text variant="displayLarge" style={styles.title}>
-        Agregar Gastos
+        Editar Gasto
       </Text>
       <View style={styles.mainContainer}>
-      <View style={styles.inputRowContainer}>
+        <View style={styles.inputRowContainer}>
           <Text variant="headlineMedium" style={styles.inputTitle}>
             Gasto Fijo:
           </Text>
@@ -128,14 +147,37 @@ export const EditExpensesScreen = () => {
             activeUnderlineColor="transparent"
           />
         </View>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, styles.drop]}>
           <Text variant="headlineSmall" style={styles.inputTitle}>
             Categoría
           </Text>
-          <TextInput
+          <DropDown
+            mode={'outlined'}
             placeholder="Categoría"
-            value={expense.category}
-            onChangeText={text => setExpense({...expense, category: text})}
+            visible={showDropDown}
+            showDropDown={() => setShowDropDown(true)}
+            onDismiss={() => setShowDropDown(false)}
+            value={currentCategory}
+            setValue={text => {
+              setCurrentCategory(text);
+              setExpense({...expense, category: text});
+            }}
+            list={categoriesList}
+            dropDownStyle={styles.dropDownStyle}
+            dropDownItemSelectedStyle={styles.dropDownItemSelectedStyle}
+            dropDownItemStyle={styles.dropDownItemStyle}
+            dropDownItemTextStyle={styles.dropDownItemTextStyle}
+            activeColor={globalColors.background}
+            inputProps={[styles.inputButtons, styles.dropdown]}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text variant="headlineSmall" style={styles.inputTitle}>
+            Tag
+          </Text>
+          <TextInput
+            value={expense.tag}
+            onChangeText={text => setExpense({...expense, tag: text})}
             style={styles.inputButtons}
             underlineColor="transparent"
             activeUnderlineColor="transparent"
@@ -196,5 +238,23 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingBottom: 20,
     flexDirection: 'row',
+  },
+  dropDownStyle: {
+    backgroundColor: globalColors.background,
+  },
+  dropDownItemSelectedStyle: {
+    backgroundColor: globalColors.secondary,
+  },
+  dropDownItemStyle: {
+    backgroundColor: globalColors.background,
+  },
+  dropDownItemTextStyle: {
+    color: globalColors.dark,
+  },
+  dropdown: {
+    backgroundColor: globalColors.background,
+  },
+  drop: {
+    paddingBottom: 10,
   },
 });
