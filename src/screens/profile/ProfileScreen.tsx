@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
-import {Button, Text} from 'react-native-paper';
+import {Text} from 'react-native-paper';
 import {Expense} from '../../utils/Expense';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalColors} from '../../themes/theme';
@@ -9,6 +9,7 @@ import {ExpenseCard} from '../../components/expense/ExpenseCard';
 import Toast from 'react-native-toast-message';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../App';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -68,18 +69,32 @@ export const ProfileScreen = () => {
       deleteExpense={deleteExpense}
       showToastSuccess={showToastSuccess}
       showToastError={showToastError}
-      /* navigation={(item: Expense) => {
-        navigation.navigate('EditExpenses', {item});
-      }} */
       navigation={navigation}
     />
   );
 
   return (
     <View style={styles.container}>
-      <Text variant="displayLarge" style={styles.title}>
-        Lista de Gastos
-      </Text>
+      <View style={styles.titleContainer}>
+        <Text variant="displayLarge" style={styles.title}>
+          Lista de Gastos
+        </Text>
+        <Icon name={'log-out-outline'} size={40} onPress={() => navigation.navigate('LoginScreen')}/>
+      </View>
+      <View style={styles.circleContainer}>
+        <View style={styles.circleContainerItem}>
+          <View style={styles.circleFixed} />
+          <Text variant="titleLarge" style={styles.circleText}>
+            Gasto Fijo
+          </Text>
+        </View>
+        <View style={styles.circleContainerItem}>
+          <View style={styles.circleNotFixed} />
+          <Text variant="titleLarge" style={styles.circleText}>
+            Gasto Normal
+          </Text>
+        </View>
+      </View>
       <FlatList
         data={expenses}
         renderItem={renderItem}
@@ -95,6 +110,10 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
     paddingVertical: 20,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   button: {
     backgroundColor: globalColors.primary,
@@ -116,5 +135,33 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderWidth: 1,
     borderRadius: 10,
+  },
+  circleFixed: {
+    borderRadius: 7.5,
+    width: 15,
+    height: 15,
+    backgroundColor: globalColors.secondary,
+  },
+  circleNotFixed: {
+    borderRadius: 7.5,
+    width: 15,
+    height: 15,
+    borderWidth: 1,
+    borderColor: globalColors.dark,
+    backgroundColor: globalColors.background,
+  },
+  circleContainerItem: {
+    flexDirection: 'row',
+    gap: 15,
+    alignItems: 'center',
+  },
+  circleContainer: {
+    flexDirection: 'row',
+    gap: 30,
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  circleText: {
+    color: globalColors.primary,
   },
 });

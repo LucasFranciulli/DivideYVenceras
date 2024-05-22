@@ -4,14 +4,13 @@ import {Button, Divider, Menu, Modal, Portal, Text} from 'react-native-paper';
 import {Expense} from '../../utils/Expense';
 import {globalColors} from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { EditExpensesScreenNavigationProp } from '../../screens/profile/ProfileScreen';
+import {EditExpensesScreenNavigationProp} from '../../screens/profile/ProfileScreen';
 
 interface Props {
   item: Expense;
   deleteExpense: (id: number) => Promise<void>;
   showToastSuccess: (message: string) => void;
   showToastError: (message: string) => void;
-  /* navigation: (item: Expense) => void; */
   navigation: EditExpensesScreenNavigationProp;
 }
 
@@ -41,25 +40,31 @@ export const ExpenseCard = ({
     }
   };
 
+  console.log('item.isFixed: ', item.isFixed);
+
   return (
-    <View style={styles.itemContainer}>
+    <View
+      style={[
+        styles.itemContainer,
+        item.isFixed ? styles.backgroundFixed : styles.backgroundNotFixed,
+      ]}>
       <View style={styles.itemDataContainer}>
         <View>
           <View style={styles.itemDataRowContainer}>
             <Text variant="titleLarge">Nombre: </Text>
-            <Text variant="titleLarge" style={styles.nameText}>
+            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
               {item.name}
             </Text>
           </View>
           <View style={styles.itemDataRowContainer}>
             <Text variant="titleLarge">Descripción: </Text>
-            <Text variant="titleLarge" style={styles.nameText}>
+            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
               {item.description}
             </Text>
           </View>
           <View style={styles.itemDataRowContainer}>
             <Text variant="titleLarge">Monto: </Text>
-            <Text variant="titleLarge" style={styles.nameText}>
+            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
               ${item.amount}
             </Text>
           </View>
@@ -94,8 +99,8 @@ export const ExpenseCard = ({
         </Menu>
       </View>
       <Button
-        style={styles.button}
-        textColor={globalColors.background}
+        style={item.isFixed ? styles.buttonFixed : styles.button}
+        textColor={item.isFixed ? globalColors.dark : globalColors.background}
         /* onPress={() => deleteExpense(item.id)} */
         onPress={showModalFinished}>
         Completar pago
@@ -138,8 +143,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
   },
+  backgroundFixed: {
+    backgroundColor: globalColors.secondary,
+    borderColor: globalColors.secondary,
+  },
   button: {
     backgroundColor: globalColors.primary,
+  },
+  buttonFixed: {
+    backgroundColor: globalColors.background,
+    borderColor: globalColors.background,
   },
   itemDataContainer: {
     justifyContent: 'space-between',
@@ -159,12 +172,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: globalColors.background,
   },
+  backgroundNotFixed: {
+    backgroundColor: globalColors.background,
+  },
   itemDataRowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   nameText: {
     color: globalColors.grey,
+  },
+  nameTextFixed: {
+    color: globalColors.background,
   },
   menu: {
     backgroundColor: globalColors.background,

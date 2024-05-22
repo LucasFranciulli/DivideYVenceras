@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Button, Text, TextInput} from 'react-native-paper';
+import {Button, Checkbox, Text, TextInput} from 'react-native-paper';
 import {RootStackParamList} from '../../../App';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {StyleSheet, View} from 'react-native';
@@ -17,13 +17,15 @@ export const EditExpensesScreen = () => {
   const route = useRoute<EditExpensesScreenRouteProp>();
   const {item, navigation} = route.params;
   const [expense, setExpense] = useState<Expense>({
-    id: item.id,
-    name: item.name,
-    description: item.description,
-    amount: item.amount,
-    expirationDate: item.expirationDate,
-    category: item.category,
-  });
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      amount: item.amount,
+      expirationDate: item.expirationDate,
+      category: item.category,
+      isFixed: item.isFixed,
+    });
+    const [checked, setChecked] = React.useState(item.isFixed);
 
   const showToastError = (message: string) => {
     Toast.show({
@@ -70,6 +72,19 @@ export const EditExpensesScreen = () => {
         Agregar Gastos
       </Text>
       <View style={styles.mainContainer}>
+      <View style={styles.inputRowContainer}>
+          <Text variant="headlineMedium" style={styles.inputTitle}>
+            Gasto Fijo:
+          </Text>
+          <Checkbox
+            status={checked ? 'checked' : 'unchecked'}
+            color={globalColors.primary}
+            onPress={() => {
+              setChecked(!checked);
+              setExpense({...expense, isFixed: !checked});
+            }}
+          />
+        </View>
         <View style={styles.inputContainer}>
           <Text variant="headlineSmall" style={styles.inputTitle}>
             Nombre
@@ -175,5 +190,11 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     gap: 10,
+  },
+  inputRowContainer: {
+    alignItems: 'center',
+    gap: 10,
+    paddingBottom: 20,
+    flexDirection: 'row',
   },
 });

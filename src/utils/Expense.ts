@@ -5,4 +5,6 @@ export interface Expense {
   amount: number;
   expirationDate?: Date;
   category?: string;
+  isFixed: boolean;
+  tag?: string;
 }
