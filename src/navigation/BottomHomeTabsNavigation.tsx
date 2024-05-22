@@ -7,7 +7,7 @@ import {GroupsScreen} from '../screens/groups/GroupsScreen';
 import { ActivityScreen } from '../screens/activity/ActivityScreen';
 import { ExpensesScreen } from '../screens/expenses/ExpensesScreen';
 
-export const BottomTabsHomeNavigator = () => {
+export const BottomTabsHomeNavigator = ({navigation}) => {
   const Tab = createBottomTabNavigator();
   const [showTab, setShowTab] = useState(true);
 

@@ -4,6 +4,7 @@ export const globalColors = {
   tertiary: '#599a52',
   background: '#f6f6f6',
   dark: '#081324',
+  grey: '#50555c',
 };
 
 /* export const HeaderStyles = StyleSheet.create({

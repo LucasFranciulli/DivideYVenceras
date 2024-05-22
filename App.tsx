@@ -8,7 +8,18 @@ import {LoginScreen} from './src/screens/login/LoginScreen';
 import {RegisterScreen} from './src/screens/register/RegisterScreen';
 import {HomeScreen} from './src/screens/home/HomeScreen';
 import Toast from 'react-native-toast-message';
-import { BottomTabsHomeNavigator } from './src/navigation/BottomHomeTabsNavigation';
+import {BottomTabsHomeNavigator} from './src/navigation/BottomHomeTabsNavigation';
+import {EditExpensesScreen} from './src/screens/expenses/EditExpensesScreen';
+import {Expense} from './src/utils/Expense';
+import {EditExpensesScreenNavigationProp} from './src/screens/profile/ProfileScreen';
+
+export type RootStackParamList = {
+  LoginScreen: undefined;
+  RegisterScreen: undefined;
+  HomeScreen: undefined;
+  EditExpenses: {item: Expense; navigation: EditExpensesScreenNavigationProp};
+  BottomTabsHomeNavigator: undefined;
+};
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -37,6 +48,13 @@ function App(): React.JSX.Element {
           <Stack.Screen
             name="HomeScreen"
             component={HomeScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="EditExpenses"
+            component={EditExpensesScreen}
             options={{
               headerShown: false,
             }}

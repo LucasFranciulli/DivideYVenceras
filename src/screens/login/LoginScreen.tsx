@@ -63,7 +63,7 @@ export const LoginScreen = ({ navigation }) => {
           console.error('Failed to save credentials', e);
         }
       }
-      navigation.navigate('BottomTabsHomeNavigator');
+      navigation.navigate('BottomTabsHomeNavigator', navigation);
     } else {
       showToastError();
     }

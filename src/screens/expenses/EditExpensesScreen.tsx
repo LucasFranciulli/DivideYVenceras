@@ -1,19 +1,28 @@
 import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
 import {Button, Text, TextInput} from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {RootStackParamList} from '../../../App';
+import {RouteProp, useRoute} from '@react-navigation/native';
+import {StyleSheet, View} from 'react-native';
 import {globalColors} from '../../themes/theme';
 import {Expense} from '../../utils/Expense';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
-export const ExpensesScreen = () => {
+type EditExpensesScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'EditExpenses'
+>;
+
+export const EditExpensesScreen = () => {
+  const route = useRoute<EditExpensesScreenRouteProp>();
+  const {item, navigation} = route.params;
   const [expense, setExpense] = useState<Expense>({
-    id: Date.now(),
-    name: '',
-    description: '',
-    amount: 0,
-    expirationDate: undefined,
-    category: '',
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    amount: item.amount,
+    expirationDate: item.expirationDate,
+    category: item.category,
   });
 
   const showToastError = (message: string) => {
@@ -32,24 +41,26 @@ export const ExpensesScreen = () => {
     });
   };
 
-  const addExpense = async () => {
+  const updateExpense = async () => {
     try {
       const storedExpenses = await AsyncStorage.getItem('expenses');
       const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
-      expenses.push(expense);
-      await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
-      setExpense({
-        id: Date.now(),
-        name: '',
-        description: '',
-        amount: 0,
-        expirationDate: undefined,
-        category: '',
-      });
-      showToastSuccess('Gasto añadido!');
+
+      const expenseIndex = expenses.findIndex(
+        (exp: Expense) => exp.id === expense.id,
+      );
+
+      if (expenseIndex !== -1) {
+        expenses[expenseIndex] = expense;
+        await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
+        showToastSuccess('Gasto actualizado!');
+        navigation.goBack();
+      } else {
+        showToastError('No se encontró el gasto para actualizar');
+      }
     } catch (error) {
-      showToastError('No se pudo agregar el gasto');
-      console.error('Error saving expense:', error);
+      showToastError('No se pudo actualizar el gasto');
+      console.error('Error updating expense:', error);
     }
   };
 
@@ -92,9 +103,10 @@ export const ExpensesScreen = () => {
           <TextInput
             placeholder="Monto"
             value={expense.amount.toString()}
-            onChangeText={text =>
-              setExpense({...expense, amount: parseFloat(text)})
-            }
+            onChangeText={text => {
+              const amount = parseFloat(text);
+              setExpense({...expense, amount: isNaN(amount) ? 0 : amount});
+            }}
             keyboardType="numeric"
             style={styles.inputButtons}
             underlineColor="transparent"
@@ -116,8 +128,8 @@ export const ExpensesScreen = () => {
         </View>
       </View>
       <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={addExpense} style={styles.button}>
-          Añadir
+        <Button mode="contained" onPress={updateExpense} style={styles.button}>
+          Actualizar
         </Button>
       </View>
     </View>

@@ -4,10 +4,20 @@ import {Button, Text} from 'react-native-paper';
 import {Expense} from '../../utils/Expense';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalColors} from '../../themes/theme';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {ExpenseCard} from '../../components/expense/ExpenseCard';
+import Toast from 'react-native-toast-message';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../../App';
+
+export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'EditExpenses'
+>;
 
 export const ProfileScreen = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const navigation = useNavigation<EditExpensesScreenNavigationProp>();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -26,6 +36,22 @@ export const ProfileScreen = () => {
     }, []),
   );
 
+  const showToastError = (message: string) => {
+    Toast.show({
+      type: 'error',
+      text1: 'Error',
+      text2: message,
+    });
+  };
+
+  const showToastSuccess = (message: string) => {
+    Toast.show({
+      type: 'success',
+      text1: message,
+      text2: '',
+    });
+  };
+
   const deleteExpense = async (id: number) => {
     try {
       const filteredExpenses = expenses.filter(expense => expense.id !== id);
@@ -37,19 +63,16 @@ export const ProfileScreen = () => {
   };
 
   const renderItem = ({item}: {item: Expense}) => (
-    <View style={styles.itemContainer}>
-      <View style={styles.itemDataContainer}>
-        <Text variant="headlineSmall">{item.name}</Text>
-        <Text variant="headlineSmall">{item.description}</Text>
-        <Text variant="headlineSmall">${item.amount}</Text>
-      </View>
-      <Button
-        style={styles.button}
-        textColor={globalColors.background}
-        onPress={() => deleteExpense(item.id)}>
-        Eliminar
-      </Button>
-    </View>
+    <ExpenseCard
+      item={item}
+      deleteExpense={deleteExpense}
+      showToastSuccess={showToastSuccess}
+      showToastError={showToastError}
+      /* navigation={(item: Expense) => {
+        navigation.navigate('EditExpenses', {item});
+      }} */
+      navigation={navigation}
+    />
   );
 
   return (

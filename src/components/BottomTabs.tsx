@@ -12,6 +12,7 @@ import {
 import React from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {globalColors} from '../themes/theme';
+
 export interface Props {
   state: TabNavigationState<ParamListBase>;
   descriptors: BottomTabDescriptorMap;
