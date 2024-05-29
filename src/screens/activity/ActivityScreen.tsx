@@ -64,6 +64,27 @@ export const ActivityScreen = () => {
     }));
   };
 
+  const getTagsData = () => {
+    const TagMap: { [key: string]: number } = {};
+
+    expenses.forEach(expense => {
+      if (expense.tag) {
+        if (!TagMap[expense.tag]) {
+          TagMap[expense.tag] = 0;
+        }
+        TagMap[expense.tag] += expense.amount;
+      }
+    });
+
+    return Object.keys(TagMap).map(category => ({
+      name: `$  ${category}`,
+      amount: TagMap[category],
+      color: generateRandomColor(),
+      legendFontColor: '#7F7F7F',
+      legendFontSize: 15,
+    }));
+  };
+
   const getTotalAmountData = () => {
     let totalAmount = 0;
     const data = expenses.map(expense => {
@@ -116,6 +137,21 @@ export const ActivityScreen = () => {
             </Text>
             <PieChart
               data={getCategoryData()}
+              width={screenWidth}
+              height={220}
+              chartConfig={chartConfig}
+              accessor="amount"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              absolute
+            />
+          </View>
+          <View style={styles.chartContainer}>
+            <Text variant="headlineSmall" style={styles.chartTitle}>
+              Gastos por Tags
+            </Text>
+            <PieChart
+              data={getTagsData()}
               width={screenWidth}
               height={220}
               chartConfig={chartConfig}
