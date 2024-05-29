@@ -79,6 +79,7 @@ export const ExpensesScreen = () => {
       const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
       expenses.push(expense);
       await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
+
       setExpense({
         id: Date.now(),
         name: '',
@@ -86,7 +87,7 @@ export const ExpensesScreen = () => {
         amount: 0,
         expirationDate: undefined,
         category: '',
-        isFixed: !checked,
+        isFixed: checked,
       });
       showToastSuccess('Gasto añadido!');
     } catch (error) {
@@ -176,6 +177,10 @@ export const ExpensesScreen = () => {
     setExpense({...expense, tag: currentTag});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTag]);
+
+  useEffect(()=>{
+    console.log("gasto fijo es??", checked);
+  },[]);
 
   return (
     <View style={styles.container}>
@@ -320,6 +325,7 @@ export const ExpensesScreen = () => {
               color={globalColors.background}
               onPress={() => {
                 setChecked(!checked);
+                setExpense({ ...expense, isFixed: !checked });
               }}
             />
           </View>
