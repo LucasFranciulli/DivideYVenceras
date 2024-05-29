@@ -8,6 +8,8 @@ import {Expense} from '../../utils/Expense';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import DropDown from 'react-native-paper-dropdown';
+import { showToastError, showToastSuccess } from '../../utils/ToastActions';
+import { styleEditExpenses } from './style';
 
 type EditExpensesScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -31,22 +33,6 @@ export const EditExpensesScreen = () => {
   const [currentCategory, setCurrentCategory] = useState(item.category);
   const [categoriesList, setCategoriesList] = useState([]);
 
-  const showToastError = (message: string) => {
-    Toast.show({
-      type: 'error',
-      text1: 'Error',
-      text2: message,
-    });
-  };
-
-  const showToastSuccess = (message: string) => {
-    Toast.show({
-      type: 'success',
-      text1: message,
-      text2: '',
-    });
-  };
-
   const updateExpense = async () => {
     try {
       const storedExpenses = await AsyncStorage.getItem('expenses');
@@ -59,13 +45,13 @@ export const EditExpensesScreen = () => {
       if (expenseIndex !== -1) {
         expenses[expenseIndex] = expense;
         await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
-        showToastSuccess('Gasto actualizado!');
+        showToastSuccess('Gasto actualizado!', '');
         navigation.goBack();
       } else {
-        showToastError('No se encontró el gasto para actualizar');
+        showToastError('Error', 'No se encontró el gasto para actualizar');
       }
     } catch (error) {
-      showToastError('No se pudo actualizar el gasto');
+      showToastError('Error', 'No se pudo actualizar el gasto');
       console.error('Error updating expense:', error);
     }
   };
@@ -86,13 +72,13 @@ export const EditExpensesScreen = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text variant="displayLarge" style={styles.title}>
+    <View style={styleEditExpenses.container}>
+      <Text variant="displayLarge" style={styleEditExpenses.title}>
         Editar Gasto
       </Text>
-      <View style={styles.mainContainer}>
-        <View style={styles.inputRowContainer}>
-          <Text variant="headlineMedium" style={styles.inputTitle}>
+      <View style={styleEditExpenses.mainContainer}>
+        <View style={styleEditExpenses.inputRowContainer}>
+          <Text variant="headlineMedium" style={styleEditExpenses.inputTitle}>
             Gasto Fijo:
           </Text>
           <Checkbox
@@ -104,34 +90,34 @@ export const EditExpensesScreen = () => {
             }}
           />
         </View>
-        <View style={styles.inputContainer}>
-          <Text variant="headlineSmall" style={styles.inputTitle}>
+        <View style={styleEditExpenses.inputContainer}>
+          <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
             Nombre
           </Text>
           <TextInput
             placeholder="Nombre"
             value={expense.name}
             onChangeText={text => setExpense({...expense, name: text})}
-            style={styles.inputButtons}
+            style={styleEditExpenses.inputButtons}
             underlineColor="transparent"
             activeUnderlineColor="transparent"
           />
         </View>
-        <View style={styles.inputContainer}>
-          <Text variant="headlineSmall" style={styles.inputTitle}>
+        <View style={styleEditExpenses.inputContainer}>
+          <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
             Descipción
           </Text>
           <TextInput
             placeholder="Descripción"
             value={expense.description}
             onChangeText={text => setExpense({...expense, description: text})}
-            style={styles.inputButtons}
+            style={styleEditExpenses.inputButtons}
             underlineColor="transparent"
             activeUnderlineColor="transparent"
           />
         </View>
-        <View style={styles.inputContainer}>
-          <Text variant="headlineSmall" style={styles.inputTitle}>
+        <View style={styleEditExpenses.inputContainer}>
+          <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
             Monto
           </Text>
           <TextInput
@@ -142,13 +128,13 @@ export const EditExpensesScreen = () => {
               setExpense({...expense, amount: isNaN(amount) ? 0 : amount});
             }}
             keyboardType="numeric"
-            style={styles.inputButtons}
+            style={styleEditExpenses.inputButtons}
             underlineColor="transparent"
             activeUnderlineColor="transparent"
           />
         </View>
-        <View style={[styles.inputContainer, styles.drop]}>
-          <Text variant="headlineSmall" style={styles.inputTitle}>
+        <View style={[styleEditExpenses.inputContainer, styleEditExpenses.drop]}>
+          <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
             Categoría
           </Text>
           <DropDown
@@ -163,98 +149,32 @@ export const EditExpensesScreen = () => {
               setExpense({...expense, category: text});
             }}
             list={categoriesList}
-            dropDownStyle={styles.dropDownStyle}
-            dropDownItemSelectedStyle={styles.dropDownItemSelectedStyle}
-            dropDownItemStyle={styles.dropDownItemStyle}
-            dropDownItemTextStyle={styles.dropDownItemTextStyle}
+            dropDownStyle={styleEditExpenses.dropDownStyle}
+            dropDownItemSelectedStyle={styleEditExpenses.dropDownItemSelectedStyle}
+            dropDownItemStyle={styleEditExpenses.dropDownItemStyle}
+            dropDownItemTextStyle={styleEditExpenses.dropDownItemTextStyle}
             activeColor={globalColors.background}
-            inputProps={[styles.inputButtons, styles.dropdown]}
+            inputProps={[styleEditExpenses.inputButtons, styleEditExpenses.dropdown]}
           />
         </View>
-        <View style={styles.inputContainer}>
-          <Text variant="headlineSmall" style={styles.inputTitle}>
+        <View style={styleEditExpenses.inputContainer}>
+          <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
             Tag
           </Text>
           <TextInput
             value={expense.tag}
             onChangeText={text => setExpense({...expense, tag: text})}
-            style={styles.inputButtons}
+            style={styleEditExpenses.inputButtons}
             underlineColor="transparent"
             activeUnderlineColor="transparent"
           />
         </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={updateExpense} style={styles.button}>
+      <View style={styleEditExpenses.buttonContainer}>
+        <Button mode="contained" onPress={updateExpense} style={styleEditExpenses.button}>
           Actualizar
         </Button>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: '100%',
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 30,
-  },
-  mainContainer: {
-    width: '100%',
-  },
-  buttonContainer: {
-    paddingTop: 20,
-    width: '50%',
-  },
-  button: {
-    backgroundColor: globalColors.secondary,
-    width: '80%',
-    alignSelf: 'center',
-  },
-  title: {
-    color: globalColors.primary,
-    paddingBottom: 50,
-    alignSelf: 'flex-start',
-  },
-  inputButtons: {
-    borderColor: 'black',
-    borderWidth: 1,
-    backgroundColor: 'white',
-    marginBottom: 10,
-    borderRadius: 10,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  inputTitle: {
-    color: globalColors.primary,
-  },
-  inputContainer: {
-    gap: 10,
-  },
-  inputRowContainer: {
-    alignItems: 'center',
-    gap: 10,
-    paddingBottom: 20,
-    flexDirection: 'row',
-  },
-  dropDownStyle: {
-    backgroundColor: globalColors.background,
-  },
-  dropDownItemSelectedStyle: {
-    backgroundColor: globalColors.secondary,
-  },
-  dropDownItemStyle: {
-    backgroundColor: globalColors.background,
-  },
-  dropDownItemTextStyle: {
-    color: globalColors.dark,
-  },
-  dropdown: {
-    backgroundColor: globalColors.background,
-  },
-  drop: {
-    paddingBottom: 10,
-  },
-});

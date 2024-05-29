@@ -4,8 +4,10 @@ import { Button, Checkbox, Text, TextInput } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from './style';
+import { showToastError, showToastSuccess } from '../../utils/ToastActions';
 
-export const LoginScreen = ({ navigation }) => {
+export const LoginScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [hidePassword, setHidePassword] = useState(true);
@@ -33,28 +35,12 @@ export const LoginScreen = ({ navigation }) => {
     setHidePassword(!hidePassword);
   };
 
-  const showToastError = () => {
-    Toast.show({
-      type: 'error',
-      text1: 'Error',
-      text2: 'Usuario o contraseña incorrectos',
-    });
-  };
-
-  const showToastSuccess = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'Se logeo con exito!',
-      text2: '',
-    });
-  };
-
   const onLogin = async (inputUsername: string, inputPassword: string, skipSave = false) => {
     const usernameToCheck = inputUsername || username;
     const passwordToCheck = inputPassword || password;
 
     if (usernameToCheck === 'test' && passwordToCheck === '1234') {
-      showToastSuccess();
+      showToastSuccess('Se logeo con exito!', '');
       if (rememberPassword && !skipSave) {
         try {
           await AsyncStorage.setItem('username', usernameToCheck);
@@ -65,7 +51,7 @@ export const LoginScreen = ({ navigation }) => {
       }
       navigation.navigate('BottomTabsHomeNavigator', navigation);
     } else {
-      showToastError();
+      showToastError('Error', 'Usuario o contraseña incorrectos');
     }
   };
 
@@ -147,57 +133,3 @@ export const LoginScreen = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: '100%',
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputUser: {
-    gap: 20,
-    width: '80%',
-  },
-  inputButtons: {
-    borderColor: 'black',
-    borderWidth: 1,
-    backgroundColor: 'white',
-    marginBottom: 10,
-    borderRadius: 10,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rememberPasswordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  lowerContainers: {
-    alignSelf: 'center',
-    width: '100%',
-    paddingTop: 50,
-  },
-  button: {
-    backgroundColor: '#2d643f',
-    width: '60%',
-    alignSelf: 'center',
-  },
-  title: {
-    alignItems: 'flex-end',
-    width: '80%',
-    paddingBottom: 50,
-  },
-  titleText: {
-    color: '#2d643f',
-  },
-  register: {
-    textDecorationLine: 'underline',
-    alignSelf: 'flex-end',
-    paddingTop: 70,
-  },
-});

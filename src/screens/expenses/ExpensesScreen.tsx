@@ -14,6 +14,8 @@ import {Expense} from '../../utils/Expense';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DropDown from 'react-native-paper-dropdown';
+import { styleListExpenses } from './style';
+import { showToastError, showToastSuccess } from '../../utils/ToastActions';
 
 export const ExpensesScreen = () => {
   const [showDropDownCategories, setShowDropDownCategories] = useState(false);
@@ -57,22 +59,6 @@ export const ExpensesScreen = () => {
   });
   const [checked, setChecked] = React.useState(false);
 
-  const showToastError = (message: string) => {
-    Toast.show({
-      type: 'error',
-      text1: 'Error',
-      text2: message,
-    });
-  };
-
-  const showToastSuccess = (message: string) => {
-    Toast.show({
-      type: 'success',
-      text1: message,
-      text2: '',
-    });
-  };
-
   const addExpense = async () => {
     try {
       const storedExpenses = await AsyncStorage.getItem('expenses');
@@ -89,16 +75,16 @@ export const ExpensesScreen = () => {
         category: '',
         isFixed: checked,
       });
-      showToastSuccess('Gasto añadido!');
+      showToastSuccess('Gasto añadido!', '');
     } catch (error) {
-      showToastError('No se pudo agregar el gasto');
+      showToastError('Error', 'No se pudo agregar el gasto');
       console.error('Error saving expense:', error);
     }
   };
 
   const addTag = async () => {
     if (!newTag.trim()) {
-      showToastError('La categoría no puede estar vacía');
+      showToastError('Error', 'La categoría no puede estar vacía');
       return;
     }
 
@@ -118,9 +104,9 @@ export const ExpensesScreen = () => {
       setTagList(prevTag => [...prevTag, newTagItem]);
       setNewTag('');
       hideModalFinished();
-      showToastSuccess('Categoría añadida!');
+      showToastSuccess('Categoría añadida!', '');
     } catch (error) {
-      showToastError('No se pudo agregar la categoría');
+      showToastError('Error', 'No se pudo agregar la categoría');
       console.error('Error saving category:', error);
     }
   };
@@ -136,9 +122,9 @@ export const ExpensesScreen = () => {
       setTagList(Tag);
       setSelectedTags([]);
       hideModalRemove();
-      showToastSuccess('Tags eliminados!');
+      showToastSuccess('Tags eliminados!', '');
     } catch (error) {
-      showToastError('No se pudo eliminar los tags');
+      showToastError('Error', 'No se pudo eliminar los tags');
       console.error('Error removing Tag:', error);
     }
   };
@@ -183,40 +169,40 @@ export const ExpensesScreen = () => {
   },[]);
 
   return (
-    <View style={styles.container}>
-      <Text variant="displayLarge" style={styles.title}>
+    <View style={styleListExpenses.container}>
+      <Text variant="displayLarge" style={styleListExpenses.title}>
         Agregar Gastos
       </Text>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.mainContainer}>
-          <View style={styles.inputContainer}>
-            <Text variant="headlineSmall" style={styles.inputTitle}>
+      <ScrollView contentContainerStyle={styleListExpenses.scrollViewContent}>
+        <View style={styleListExpenses.mainContainer}>
+          <View style={styleListExpenses.inputContainer}>
+            <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Nombre
             </Text>
             <TextInput
               placeholder="Nombre"
               value={expense.name}
               onChangeText={text => setExpense({...expense, name: text})}
-              style={styles.inputButtons}
+              style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
             />
           </View>
-          <View style={styles.inputContainer}>
-            <Text variant="headlineSmall" style={styles.inputTitle}>
+          <View style={styleListExpenses.inputContainer}>
+            <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Descipción
             </Text>
             <TextInput
               placeholder="Descripción"
               value={expense.description}
               onChangeText={text => setExpense({...expense, description: text})}
-              style={styles.inputButtons}
+              style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
             />
           </View>
-          <View style={styles.inputContainer}>
-            <Text variant="headlineSmall" style={styles.inputTitle}>
+          <View style={styleListExpenses.inputContainer}>
+            <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Monto
             </Text>
             <TextInput
@@ -226,13 +212,13 @@ export const ExpensesScreen = () => {
                 setExpense({...expense, amount: parseFloat(text)})
               }
               keyboardType="numeric"
-              style={styles.inputButtons}
+              style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
             />
           </View>
-          <View style={[styles.inputContainer, {marginBottom: 10}]}>
-            <Text variant="headlineSmall" style={styles.inputTitle}>
+          <View style={[styleListExpenses.inputContainer, {marginBottom: 10}]}>
+            <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Categoría
             </Text>
             <DropDown
@@ -244,17 +230,17 @@ export const ExpensesScreen = () => {
               value={currentCategory}
               setValue={setCurrentCategory}
               list={categoriesList}
-              dropDownStyle={styles.dropDownStyle}
-              dropDownItemSelectedStyle={styles.dropDownItemSelectedStyle}
-              dropDownItemStyle={styles.dropDownItemStyle}
-              dropDownItemTextStyle={styles.dropDownItemTextStyle}
+              dropDownStyle={styleListExpenses.dropDownStyle}
+              dropDownItemSelectedStyle={styleListExpenses.dropDownItemSelectedStyle}
+              dropDownItemStyle={styleListExpenses.dropDownItemStyle}
+              dropDownItemTextStyle={styleListExpenses.dropDownItemTextStyle}
               activeColor={globalColors.background}
-              inputProps={[styles.inputButtons, styles.dropdown]}
+              inputProps={[styleListExpenses.inputButtons, styleListExpenses.dropdown]}
             />
           </View>
-          <View style={styles.inputContainer}>
-            <View style={styles.inputContainer}>
-              <Text variant="headlineSmall" style={styles.inputTitle}>
+          <View style={styleListExpenses.inputContainer}>
+            <View style={styleListExpenses.inputContainer}>
+              <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
                 Tags
               </Text>
               <DropDown
@@ -266,21 +252,21 @@ export const ExpensesScreen = () => {
                 value={currentTag}
                 setValue={setCurrentTag}
                 list={tagList}
-                dropDownStyle={styles.dropDownStyle}
-                dropDownItemSelectedStyle={styles.dropDownItemSelectedStyle}
-                dropDownItemStyle={styles.dropDownItemStyle}
-                dropDownItemTextStyle={styles.dropDownItemTextStyle}
+                dropDownStyle={styleListExpenses.dropDownStyle}
+                dropDownItemSelectedStyle={styleListExpenses.dropDownItemSelectedStyle}
+                dropDownItemStyle={styleListExpenses.dropDownItemStyle}
+                dropDownItemTextStyle={styleListExpenses.dropDownItemTextStyle}
                 activeColor={globalColors.background}
-                inputProps={[styles.inputButtons, styles.dropdown]}
+                inputProps={[styleListExpenses.inputButtons, styleListExpenses.dropdown]}
               />
             </View>
-            <View style={styles.inputRowContainer}>
+            <View style={styleListExpenses.inputRowContainer}>
               <Pressable
-                style={styles.addCategoriesButton}
+                style={styleListExpenses.addCategoriesButton}
                 onPress={showModalFinished}>
                 <Text
                   variant="titleMedium"
-                  style={styles.addCategoriesButtonText}>
+                  style={styleListExpenses.addCategoriesButtonText}>
                   Tag
                 </Text>
                 <Icon
@@ -290,11 +276,11 @@ export const ExpensesScreen = () => {
                 />
               </Pressable>
               <Pressable
-                style={styles.addCategoriesButton}
+                style={styleListExpenses.addCategoriesButton}
                 onPress={showModalRemove}>
                 <Text
                   variant="titleMedium"
-                  style={styles.addCategoriesButtonText}>
+                  style={styleListExpenses.addCategoriesButtonText}>
                   Tag
                 </Text>
                 <Icon
@@ -306,17 +292,17 @@ export const ExpensesScreen = () => {
             </View>
           </View>
         </View>
-        <View style={styles.buttonContainer}>
+        <View style={styleListExpenses.buttonContainer}>
           <View
             style={[
-              styles.fixedExpense,
-              checked === false && styles.notCheckedButtom,
+              styleListExpenses.fixedExpense,
+              checked === false && styleListExpenses.notCheckedButtom,
             ]}>
             <Text
               variant="titleMedium"
               style={[
-                styles.addCategoriesButtonText,
-                checked === false && styles.notCheckedText,
+                styleListExpenses.addCategoriesButtonText,
+                checked === false && styleListExpenses.notCheckedText,
               ]}>
               Gasto Fijo
             </Text>
@@ -329,7 +315,7 @@ export const ExpensesScreen = () => {
               }}
             />
           </View>
-          <Button mode="contained" onPress={addExpense} style={styles.button}>
+          <Button mode="contained" onPress={addExpense} style={styleListExpenses.button}>
             Añadir
           </Button>
         </View>
@@ -338,27 +324,27 @@ export const ExpensesScreen = () => {
         <Modal
           visible={visibleModalFinished}
           onDismiss={hideModalFinished}
-          contentContainerStyle={styles.containerStyle}>
-          <View style={styles.modalContainer}>
-            <Text variant="titleLarge" style={styles.nameTitleModal}>
+          contentContainerStyle={styleListExpenses.containerStyle}>
+          <View style={styleListExpenses.modalContainer}>
+            <Text variant="titleLarge" style={styleListExpenses.nameTitleModal}>
               Agregar nuevo Tag
             </Text>
             <TextInput
               placeholder="Nombre de la nueva categoría"
               value={newTag}
               onChangeText={text => setNewTag(text)}
-              style={styles.inputButtons}
+              style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
             />
-            <View style={styles.buttomModalButtons}>
+            <View style={styleListExpenses.buttomModalButtons}>
               <Button onPress={addTag}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
                   Añadir
                 </Text>
               </Button>
               <Button onPress={hideModalFinished}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>
@@ -370,16 +356,16 @@ export const ExpensesScreen = () => {
         <Modal
           visible={visibleModalRemove}
           onDismiss={hideModalRemove}
-          contentContainerStyle={styles.containerStyle}>
-          <View style={styles.modalContainer}>
-            <Text variant="titleLarge" style={styles.nameTitleModal}>
+          contentContainerStyle={styleListExpenses.containerStyle}>
+          <View style={styleListExpenses.modalContainer}>
+            <Text variant="titleLarge" style={styleListExpenses.nameTitleModal}>
               Eliminar categoría
             </Text>
             <FlatList
               data={categoriesList}
               keyExtractor={item => item.value}
               renderItem={({item}) => (
-                <View style={styles.categoryItem}>
+                <View style={styleListExpenses.categoryItem}>
                   <Checkbox
                     status={
                       selectedCategories.includes(item.value)
@@ -388,18 +374,18 @@ export const ExpensesScreen = () => {
                     }
                     onPress={() => toggleCategorySelection(item.value)}
                   />
-                  <Text style={styles.categoryItemText}>{item.label}</Text>
+                  <Text style={styleListExpenses.categoryItemText}>{item.label}</Text>
                 </View>
               )}
             />
-            <View style={styles.buttomModalButtons}>
+            <View style={styleListExpenses.buttomModalButtons}>
               <Button onPress={removeTag}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
                   Eliminar
                 </Text>
               </Button>
               <Button onPress={hideModalRemove}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>
@@ -410,143 +396,5 @@ export const ExpensesScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: '100%',
-    width: '100%',
-    paddingHorizontal: 30,
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 15,
-  },
-  mainContainer: {
-    width: '100%',
-  },
-  buttonContainer: {
-    paddingTop: 20,
-    width: '100%',
-    alignItems: 'center',
-    gap: 20,
-  },
-  button: {
-    backgroundColor: globalColors.secondary,
-    width: '80%',
-    alignSelf: 'center',
-  },
-  title: {
-    color: globalColors.primary,
-    paddingBottom: 30,
-    alignSelf: 'flex-start',
-  },
-  inputButtons: {
-    borderColor: 'black',
-    borderWidth: 1,
-    backgroundColor: 'white',
-    marginBottom: 10,
-    borderRadius: 10,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    width: '100%',
-  },
-  inputTitle: {
-    color: globalColors.primary,
-  },
-  inputContainer: {
-    gap: 10,
-    width: '100%',
-  },
-  inputRowContainer: {
-    alignItems: 'center',
-    gap: 10,
-    paddingBottom: 20,
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-between',
-  },
-  addCategoriesButton: {
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    width: 150,
-    borderRadius: 30,
-    backgroundColor: globalColors.secondary,
-  },
-  addCategoriesButtonText: {
-    color: globalColors.background,
-  },
-  fixedExpense: {
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    width: 150,
-    height: 45,
-    borderRadius: 30,
-    backgroundColor: globalColors.secondary,
-  },
-  notCheckedButtom: {
-    borderWidth: 1,
-    color: globalColors.dark,
-    backgroundColor: globalColors.background,
-  },
-  notCheckedText: {
-    color: globalColors.dark,
-  },
-  dropDownStyle: {
-    backgroundColor: globalColors.background,
-  },
-  dropDownItemSelectedStyle: {
-    backgroundColor: globalColors.secondary,
-  },
-  dropDownItemStyle: {
-    backgroundColor: globalColors.background,
-  },
-  dropDownItemTextStyle: {
-    color: globalColors.dark,
-  },
-  dropdown: {
-    backgroundColor: globalColors.background,
-  },
-  containerStyle: {
-    backgroundColor: 'white',
-    alignSelf: 'center',
-    padding: 20,
-    width: '80%',
-    borderRadius: 10,
-  },
-  nameTitleModal: {
-    color: globalColors.primary,
-  },
-  nameBodyModal: {
-    textAlign: 'center',
-  },
-  modalContainer: {
-    alignItems: 'center',
-    gap: 20,
-  },
-  buttomModalButtons: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-evenly',
-  },
-  categoryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  categoryItemText: {
-    marginLeft: 10,
-  },
-});
 
 export default ExpensesScreen;

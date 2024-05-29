@@ -1,15 +1,15 @@
 import React, {useState} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import {Expense} from '../../utils/Expense';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {globalColors} from '../../themes/theme';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {ExpenseCard} from '../../components/expense/ExpenseCard';
-import Toast from 'react-native-toast-message';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../App';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { styles } from './style';
+import { showToastError, showToastSuccess } from '../../utils/ToastActions';
 
 export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -37,20 +37,12 @@ export const ProfileScreen = () => {
     }, []),
   );
 
-  const showToastError = (message: string) => {
-    Toast.show({
-      type: 'error',
-      text1: 'Error',
-      text2: message,
-    });
+  const msjError = (message: string) => {
+    showToastError('Error', message);
   };
 
-  const showToastSuccess = (message: string) => {
-    Toast.show({
-      type: 'success',
-      text1: message,
-      text2: '',
-    });
+  const msjSuccess = (message: string) => {
+    showToastSuccess(message, '');
   };
 
   const deleteExpense = async (id: number) => {
@@ -67,8 +59,8 @@ export const ProfileScreen = () => {
     <ExpenseCard
       item={item}
       deleteExpense={deleteExpense}
-      showToastSuccess={showToastSuccess}
-      showToastError={showToastError}
+      showToastSuccess={msjSuccess}
+      showToastError={msjError}
       navigation={navigation}
     />
   );
@@ -113,71 +105,3 @@ export const ProfileScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: '100%',
-    width: '100%',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  button: {
-    backgroundColor: globalColors.primary,
-  },
-  itemDataContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 30,
-    paddingBottom: 15,
-  },
-  title: {
-    color: globalColors.primary,
-    paddingBottom: 20,
-  },
-  itemContainer: {
-    padding: 20,
-    marginBottom: 10,
-    borderColor: 'black',
-    borderWidth: 1,
-    borderRadius: 10,
-  },
-  circleFixed: {
-    borderRadius: 7.5,
-    width: 15,
-    height: 15,
-    backgroundColor: globalColors.secondary,
-  },
-  circleNotFixed: {
-    borderRadius: 7.5,
-    width: 15,
-    height: 15,
-    borderWidth: 1,
-    borderColor: globalColors.dark,
-    backgroundColor: globalColors.background,
-  },
-  circleContainerItem: {
-    flexDirection: 'row',
-    gap: 15,
-    alignItems: 'center',
-  },
-  circleContainer: {
-    flexDirection: 'row',
-    gap: 30,
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  circleText: {
-    color: globalColors.primary,
-  },
-  noDataText: {
-    alignSelf: 'center',
-    marginTop: 20,
-    fontSize: 18,
-    color: '#666',
-  },
-});
