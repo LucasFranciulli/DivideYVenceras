@@ -178,10 +178,6 @@ export const ExpensesScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTag]);
 
-  useEffect(()=>{
-    console.log("gasto fijo es??", checked);
-  },[]);
-
   return (
     <View style={styles.container}>
       <Text variant="displayLarge" style={styles.title}>
