@@ -16,8 +16,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import DropDown from 'react-native-paper-dropdown';
 
 export const ExpensesScreen = () => {
-  const [showDropDown, setShowDropDown] = useState(false);
+  const [showDropDownCategories, setShowDropDownCategories] = useState(false);
+  const [showDropDownTags, setShowDropDownTags] = useState(false);
   const [currentCategory, setCurrentCategory] = useState('');
+  const [currentTag, setCurrentTag] = useState('');
 
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
   const [visibleModalRemove, setVisibleModalRemove] = useState(false);
@@ -27,9 +29,21 @@ export const ExpensesScreen = () => {
   const showModalRemove = () => setVisibleModalRemove(true);
   const hideModalRemove = () => setVisibleModalRemove(false);
 
-  const [newCategory, setNewCategory] = useState('');
-  const [categoriesList, setCategoriesList] = useState([]);
+  const [categoriesList, setCategoriesList] = useState([
+    {label: 'Comida', value: 'comida'},
+    {label: 'Ropa', value: 'ropa'},
+    {label: 'Higiene', value: 'higiene'},
+    {label: 'Tecnología', value: 'tecnologia'},
+    {label: 'Bebidas', value: 'bebidas'},
+    {label: 'Farmacia', value: 'farmacia'},
+    {label: 'Entretenimiento', value: 'entretenimiento'},
+    {label: 'Otro', value: 'otro'},
+  ]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const [newTag, setNewTag] = useState('');
+  const [tagList, setTagList] = useState([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const [expense, setExpense] = useState<Expense>({
     id: Date.now(),
@@ -81,24 +95,27 @@ export const ExpensesScreen = () => {
     }
   };
 
-  const addCategory = async () => {
-    if (!newCategory.trim()) {
+  const addTag = async () => {
+    if (!newTag.trim()) {
       showToastError('La categoría no puede estar vacía');
       return;
     }
 
-    const newCategoryItem = {
-      label: newCategory,
-      value: newCategory.toLowerCase(),
+    const newTagItem = {
+      label: newTag,
+      value: newTag.toLowerCase(),
     };
 
     try {
-      const storedCategories = await AsyncStorage.getItem('categories');
-      const categories = storedCategories ? JSON.parse(storedCategories) : [];
-      const updatedCategories = [...categories, newCategoryItem];
-      await AsyncStorage.setItem('categories', JSON.stringify(updatedCategories));
-      setCategoriesList(prevCategories => [...prevCategories, newCategoryItem]);
-      setNewCategory('');
+      const storedTags = await AsyncStorage.getItem('tags');
+      const tags = storedTags ? JSON.parse(storedTags) : [];
+      const updatedCategories = [...tags, newTagItem];
+      await AsyncStorage.setItem(
+        'categories',
+        JSON.stringify(updatedCategories),
+      );
+      setTagList(prevTag => [...prevTag, newTagItem]);
+      setNewTag('');
       hideModalFinished();
       showToastSuccess('Categoría añadida!');
     } catch (error) {
@@ -107,19 +124,21 @@ export const ExpensesScreen = () => {
     }
   };
 
-  const removeCategories = async () => {
+  const removeTag = async () => {
     try {
-      const storedCategories = await AsyncStorage.getItem('categories');
-      let categories = storedCategories ? JSON.parse(storedCategories) : [];
-      categories = categories.filter((category: any) => !selectedCategories.includes(category.value));
-      await AsyncStorage.setItem('categories', JSON.stringify(categories));
-      setCategoriesList(categories);
-      setSelectedCategories([]);
+      const storedTag = await AsyncStorage.getItem('tags');
+      let Tag = storedTag ? JSON.parse(storedTag) : [];
+      Tag = Tag.filter(
+        (category: any) => !selectedTags.includes(category.value),
+      );
+      await AsyncStorage.setItem('Tag', JSON.stringify(Tag));
+      setTagList(Tag);
+      setSelectedTags([]);
       hideModalRemove();
-      showToastSuccess('Categorías eliminadas!');
+      showToastSuccess('Tags eliminados!');
     } catch (error) {
-      showToastError('No se pudo eliminar las categorías');
-      console.error('Error removing categories:', error);
+      showToastError('No se pudo eliminar los tags');
+      console.error('Error removing Tag:', error);
     }
   };
 
@@ -136,12 +155,12 @@ export const ExpensesScreen = () => {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const storedCategories = await AsyncStorage.getItem('categories');
-        if (storedCategories) {
-          setCategoriesList(JSON.parse(storedCategories));
+        const storedTags = await AsyncStorage.getItem('tags');
+        if (storedTags) {
+          setTagList(JSON.parse(storedTags));
         }
       } catch (error) {
-        console.error('Error loading categories:', error);
+        console.error('Error loading tags:', error);
       }
     };
 
@@ -152,6 +171,11 @@ export const ExpensesScreen = () => {
     setExpense({...expense, category: currentCategory});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCategory]);
+
+  useEffect(() => {
+    setExpense({...expense, tag: currentTag});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTag]);
 
   return (
     <View style={styles.container}>
@@ -202,20 +226,41 @@ export const ExpensesScreen = () => {
               activeUnderlineColor="transparent"
             />
           </View>
+          <View style={[styles.inputContainer, {marginBottom: 10}]}>
+            <Text variant="headlineSmall" style={styles.inputTitle}>
+              Categoría
+            </Text>
+            <DropDown
+              mode={'outlined'}
+              placeholder="Categoría"
+              visible={showDropDownCategories}
+              showDropDown={() => setShowDropDownCategories(true)}
+              onDismiss={() => setShowDropDownCategories(false)}
+              value={currentCategory}
+              setValue={setCurrentCategory}
+              list={categoriesList}
+              dropDownStyle={styles.dropDownStyle}
+              dropDownItemSelectedStyle={styles.dropDownItemSelectedStyle}
+              dropDownItemStyle={styles.dropDownItemStyle}
+              dropDownItemTextStyle={styles.dropDownItemTextStyle}
+              activeColor={globalColors.background}
+              inputProps={[styles.inputButtons, styles.dropdown]}
+            />
+          </View>
           <View style={styles.inputContainer}>
             <View style={styles.inputContainer}>
               <Text variant="headlineSmall" style={styles.inputTitle}>
-                Categoría
+                Tags
               </Text>
               <DropDown
                 mode={'outlined'}
-                placeholder="Categoría"
-                visible={showDropDown}
-                showDropDown={() => setShowDropDown(true)}
-                onDismiss={() => setShowDropDown(false)}
-                value={currentCategory}
-                setValue={setCurrentCategory}
-                list={categoriesList}
+                placeholder="Tags"
+                visible={showDropDownTags}
+                showDropDown={() => setShowDropDownTags(true)}
+                onDismiss={() => setShowDropDownTags(false)}
+                value={currentTag}
+                setValue={setCurrentTag}
+                list={tagList}
                 dropDownStyle={styles.dropDownStyle}
                 dropDownItemSelectedStyle={styles.dropDownItemSelectedStyle}
                 dropDownItemStyle={styles.dropDownItemStyle}
@@ -225,11 +270,13 @@ export const ExpensesScreen = () => {
               />
             </View>
             <View style={styles.inputRowContainer}>
-              <Pressable style={styles.addCategoriesButton} onPress={showModalFinished}>
+              <Pressable
+                style={styles.addCategoriesButton}
+                onPress={showModalFinished}>
                 <Text
                   variant="titleMedium"
                   style={styles.addCategoriesButtonText}>
-                  Categoría
+                  Tag
                 </Text>
                 <Icon
                   name={'add-outline'}
@@ -237,11 +284,13 @@ export const ExpensesScreen = () => {
                   color={globalColors.background}
                 />
               </Pressable>
-              <Pressable style={styles.addCategoriesButton} onPress={showModalRemove}>
+              <Pressable
+                style={styles.addCategoriesButton}
+                onPress={showModalRemove}>
                 <Text
                   variant="titleMedium"
                   style={styles.addCategoriesButtonText}>
-                  Categoría
+                  Tag
                 </Text>
                 <Icon
                   name={'remove-outline'}
@@ -250,43 +299,30 @@ export const ExpensesScreen = () => {
                 />
               </Pressable>
             </View>
-              <View
-                style={[
-                  styles.fixedExpense,
-                  checked === false && styles.notCheckedButtom,
-                ]}>
-                <Text
-                  variant="titleMedium"
-                  style={[
-                    styles.addCategoriesButtonText,
-                    checked === false && styles.notCheckedText,
-                  ]}>
-                  Gasto Fijo
-                </Text>
-                <Checkbox
-                  status={checked ? 'checked' : 'unchecked'}
-                  color={globalColors.background}
-                  onPress={() => {
-                    setChecked(!checked);
-                  }}
-                />
-              </View>
-          </View>
-          <View style={styles.inputContainer}>
-            <Text variant="headlineSmall" style={styles.inputTitle}>
-              Tag
-            </Text>
-            <TextInput
-              placeholder="Tag"
-              value={expense.tag}
-              onChangeText={text => setExpense({...expense, tag: text})}
-              style={styles.inputButtons}
-              underlineColor="transparent"
-              activeUnderlineColor="transparent"
-            />
           </View>
         </View>
         <View style={styles.buttonContainer}>
+          <View
+            style={[
+              styles.fixedExpense,
+              checked === false && styles.notCheckedButtom,
+            ]}>
+            <Text
+              variant="titleMedium"
+              style={[
+                styles.addCategoriesButtonText,
+                checked === false && styles.notCheckedText,
+              ]}>
+              Gasto Fijo
+            </Text>
+            <Checkbox
+              status={checked ? 'checked' : 'unchecked'}
+              color={globalColors.background}
+              onPress={() => {
+                setChecked(!checked);
+              }}
+            />
+          </View>
           <Button mode="contained" onPress={addExpense} style={styles.button}>
             Añadir
           </Button>
@@ -299,18 +335,18 @@ export const ExpensesScreen = () => {
           contentContainerStyle={styles.containerStyle}>
           <View style={styles.modalContainer}>
             <Text variant="titleLarge" style={styles.nameTitleModal}>
-              Agregar nueva categoría
+              Agregar nuevo Tag
             </Text>
             <TextInput
               placeholder="Nombre de la nueva categoría"
-              value={newCategory}
-              onChangeText={text => setNewCategory(text)}
+              value={newTag}
+              onChangeText={text => setNewTag(text)}
               style={styles.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
             />
             <View style={styles.buttomModalButtons}>
-              <Button onPress={addCategory}>
+              <Button onPress={addTag}>
                 <Text variant="titleMedium" style={styles.nameTitleModal}>
                   Añadir
                 </Text>
@@ -339,7 +375,11 @@ export const ExpensesScreen = () => {
               renderItem={({item}) => (
                 <View style={styles.categoryItem}>
                   <Checkbox
-                    status={selectedCategories.includes(item.value) ? 'checked' : 'unchecked'}
+                    status={
+                      selectedCategories.includes(item.value)
+                        ? 'checked'
+                        : 'unchecked'
+                    }
                     onPress={() => toggleCategorySelection(item.value)}
                   />
                   <Text style={styles.categoryItemText}>{item.label}</Text>
@@ -347,7 +387,7 @@ export const ExpensesScreen = () => {
               )}
             />
             <View style={styles.buttomModalButtons}>
-              <Button onPress={removeCategories}>
+              <Button onPress={removeTag}>
                 <Text variant="titleMedium" style={styles.nameTitleModal}>
                   Eliminar
                 </Text>
@@ -384,6 +424,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     width: '100%',
     alignItems: 'center',
+    gap: 20,
   },
   button: {
     backgroundColor: globalColors.secondary,

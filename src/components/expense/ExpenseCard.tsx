@@ -47,36 +47,42 @@ export const ExpenseCard = ({
         item.isFixed ? styles.backgroundFixed : styles.backgroundNotFixed,
       ]}>
       <View style={styles.itemDataContainer}>
-        <View>
+        <View style={{gap: 10}}>
           <View style={styles.itemDataRowContainer}>
-            <Text variant="titleLarge">Nombre: </Text>
-            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+            <Text
+              variant="headlineMedium"
+              style={
+                item.isFixed ? styles.nameTextFixed : styles.nameTitleText
+              }>
               {item.name}
             </Text>
           </View>
           <View style={styles.itemDataRowContainer}>
-            <Text variant="titleLarge">Descripción: </Text>
-            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+            <Text
+              variant="titleLarge"
+              style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
               {item.description}
             </Text>
           </View>
-          <View style={styles.itemDataRowContainer}>
-            <Text variant="titleLarge">Monto: </Text>
-            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
-              ${item.amount}
-            </Text>
-          </View>
-          <View style={styles.itemDataRowContainer}>
-            <Text variant="titleLarge">Categoría: </Text>
-            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
-              {item.category}
-            </Text>
-          </View>
-          <View style={styles.itemDataRowContainer}>
-            <Text variant="titleLarge">Tag: </Text>
-            <Text variant="titleLarge" style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
-              {item.tag}
-            </Text>
+          <View style={{flexDirection: 'row', gap: 20}}>
+            {item.category && (
+              <View style={[styles.itemDataRowContainer, styles.category]}>
+                <Text
+                  variant="titleMedium"
+                  style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+                  {item.category}
+                </Text>
+              </View>
+            )}
+            {item.tag && (
+              <View style={[styles.itemDataRowContainer, styles.tag]}>
+                <Text
+                  variant="titleMedium"
+                  style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+                  {item.tag}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
         <Menu
@@ -112,7 +118,7 @@ export const ExpenseCard = ({
         style={item.isFixed ? styles.buttonFixed : styles.button}
         textColor={item.isFixed ? globalColors.dark : globalColors.background}
         onPress={showModalFinished}>
-        Completar pago
+        $ {item.amount}
       </Button>
       <Portal>
         <Modal
@@ -151,6 +157,16 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
     paddingVertical: 20,
+  },
+  tag: {
+    borderRadius: 30,
+    padding: 7,
+    backgroundColor: globalColors.tag,
+  },
+  category: {
+    borderRadius: 30,
+    padding: 7,
+    backgroundColor: globalColors.category,
   },
   backgroundFixed: {
     backgroundColor: globalColors.secondary,
@@ -193,6 +209,9 @@ const styles = StyleSheet.create({
   },
   nameTextFixed: {
     color: globalColors.background,
+  },
+  nameTitleText: {
+    color: globalColors.dark,
   },
   menu: {
     backgroundColor: globalColors.background,

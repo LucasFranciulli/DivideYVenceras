@@ -1,10 +1,11 @@
-import React, {useState, useEffect} from 'react';
-import {Pressable, StyleSheet, View, FlatList, Alert} from 'react-native';
-import {Button, Modal, Portal, Text, TextInput} from 'react-native-paper';
-import {globalColors} from '../../themes/theme';
+import React, { useState, useEffect } from 'react';
+import { Pressable, StyleSheet, View, FlatList } from 'react-native';
+import { Button, Modal, Portal, Text, TextInput } from 'react-native-paper';
+import { globalColors } from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {Group} from '../../utils/Group';
+import { Group } from '../../utils/Group';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GroupCard from '../../components/groups/GroupCard';
 
 export const GroupsScreen = () => {
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
@@ -12,6 +13,7 @@ export const GroupsScreen = () => {
   const [group, setGroup] = useState<Group>({
     id: Date.now(),
     name: '',
+    color: '',
   });
 
   const showModalFinished = () => setVisibleModalFinished(true);
@@ -38,7 +40,7 @@ export const GroupsScreen = () => {
       const newGroups = [...groups, group];
       await AsyncStorage.setItem('groups', JSON.stringify(newGroups));
       setGroups(newGroups);
-      setGroup({id: Date.now(), name: ''});
+      setGroup({ id: Date.now(), name: '', color: '' });
       hideModalFinished();
     } catch (error) {
       console.error('Error saving group:', error);
@@ -59,17 +61,11 @@ export const GroupsScreen = () => {
     fetchGroups();
   }, []);
 
-  const renderGroupItem = ({item}: {item: Group}) => (
-    <View style={styles.groupItem}>
-      <Text>{item.name}</Text>
-      <Pressable
-        onPress={() => {
-          setIdDelete(item.id);
-          showModalDelete();
-        }}>
-        <Text style={styles.deleteText}>Salir</Text>
-      </Pressable>
-    </View>
+  const renderGroupItem = ({ item }: { item: Group }) => (
+    <GroupCard id={item.id} name={item.name} color={item.color} onLeaveGroup={(id: number) => {
+      setIdDelete(id);
+      showModalDelete();
+    }} />
   );
 
   return (
@@ -82,11 +78,7 @@ export const GroupsScreen = () => {
           <Text variant="titleMedium" style={styles.titleButton}>
             Crear grupo
           </Text>
-          <Icon
-            name={'add-outline'}
-            size={25}
-            color={globalColors.background}
-          />
+          <Icon name={'add-outline'} size={25} color={globalColors.background} />
         </Pressable>
       </View>
       <View>
@@ -118,11 +110,27 @@ export const GroupsScreen = () => {
             <TextInput
               placeholder="Nombre"
               value={group.name}
-              onChangeText={text => setGroup({...group, name: text})}
+              onChangeText={text => setGroup({ ...group, name: text })}
               style={styles.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
             />
+            <Text variant="titleMedium" style={styles.nameBodyModal}>
+              Color del grupo
+            </Text>
+            <View style={styles.colors}>
+              {['red', 'blue', 'purple', 'green', 'yellow'].map(color => (
+                <Pressable
+                  key={color}
+                  onPress={() => setGroup({ ...group, color: color })}
+                  style={[
+                    styles.colorCircle,
+                    { backgroundColor: color },
+                    group.color === color && styles.selectedColorCircle,
+                  ]}
+                />
+              ))}
+            </View>
             <View style={styles.buttomModalButtons}>
               <Button onPress={saveGroup}>
                 <Text variant="titleMedium" style={styles.nameTitleModal}>
@@ -240,16 +248,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#666',
   },
-  groupItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+  colors: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 10,
   },
-  deleteText: {
-    color: 'red',
+  colorCircle: {
+    borderWidth: 1,
+    borderRadius: 50,
+    width: 40,
+    height: 40,
+  },
+  selectedColorCircle: {
+    borderWidth: 5,
+    borderColor: 'black',
   },
 });
 

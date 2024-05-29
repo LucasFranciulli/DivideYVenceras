@@ -2,6 +2,8 @@ export const globalColors = {
   primary: '#2d643f',
   secondary: '#437f48',
   tertiary: '#599a52',
+  tag: '#cbf1c7',
+  category: '#afcfac',
   background: '#f6f6f6',
   dark: '#081324',
   grey: '#50555c',
