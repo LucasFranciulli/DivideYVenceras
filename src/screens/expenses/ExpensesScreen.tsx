@@ -112,7 +112,7 @@ export const ExpensesScreen = () => {
       const tags = storedTags ? JSON.parse(storedTags) : [];
       const updatedCategories = [...tags, newTagItem];
       await AsyncStorage.setItem(
-        'categories',
+        'tags',
         JSON.stringify(updatedCategories),
       );
       setTagList(prevTag => [...prevTag, newTagItem]);
@@ -132,7 +132,7 @@ export const ExpensesScreen = () => {
       Tag = Tag.filter(
         (category: any) => !selectedTags.includes(category.value),
       );
-      await AsyncStorage.setItem('Tag', JSON.stringify(Tag));
+      await AsyncStorage.setItem('tag', JSON.stringify(Tag));
       setTagList(Tag);
       setSelectedTags([]);
       hideModalRemove();
