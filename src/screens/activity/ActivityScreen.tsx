@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -6,11 +6,11 @@ import {
   Dimensions,
   RefreshControl,
 } from 'react-native';
-import { Text } from 'react-native-paper';
+import {Text} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Expense } from '../../utils/Expense';
-import { PieChart, LineChart, BarChart } from 'react-native-chart-kit';
-import { globalColors } from '../../themes/theme';
+import {Expense} from '../../utils/Expense';
+import {PieChart, LineChart, BarChart} from 'react-native-chart-kit';
+import {globalColors} from '../../themes/theme';
 import { chartConfig, styles } from './style';
 
 const screenWidth = Dimensions.get('window').width;
@@ -45,7 +45,7 @@ export const ActivityScreen = () => {
   };
 
   const getCategoryData = () => {
-    const categoryMap: { [key: string]: number } = {};
+    const categoryMap: {[key: string]: number} = {};
 
     expenses.forEach(expense => {
       if (expense.category) {
@@ -66,7 +66,7 @@ export const ActivityScreen = () => {
   };
 
   const getTagsData = () => {
-    const TagMap: { [key: string]: number } = {};
+    const TagMap: {[key: string]: number} = {};
 
     expenses.forEach(expense => {
       if (expense.tag) {
@@ -168,7 +168,9 @@ export const ActivityScreen = () => {
             </Text>
             <LineChart
               data={{
-                labels: expenses.map((_, index) => `${index + 1}`),
+                labels: expenses.map(expense =>
+                  new Date(expense.date).toLocaleDateString(),
+                ),
                 datasets: [
                   {
                     data: getTotalAmountData(),
@@ -182,6 +184,7 @@ export const ActivityScreen = () => {
               chartConfig={chartConfig}
               bezier
               fromZero
+              xLabelsOffset={2}
             />
           </View>
           <View style={styles.chartContainer}>

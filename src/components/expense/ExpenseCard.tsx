@@ -24,6 +24,16 @@ export const ExpenseCard = ({
   const [visible, setVisible] = useState(false);
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
 
+  const formatDate = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear().toString().slice(-2);
+    return `${day}/${month}/${year}`;
+  };
+
+  const date = item.date ? formatDate(item.date) : '';
+
   const showModalFinished = () => setVisibleModalFinished(true);
   const hideModalFinished = () => setVisibleModalFinished(false);
 
@@ -47,15 +57,34 @@ export const ExpenseCard = ({
         item.isFixed ? styles.backgroundFixed : styles.backgroundNotFixed,
       ]}>
       <View style={styles.itemDataContainer}>
-        <View style={{gap: 10}}>
-          <View style={styles.itemDataRowContainer}>
-            <Text
-              variant="headlineMedium"
-              style={
-                item.isFixed ? styles.nameTextFixed : styles.nameTitleText
-              }>
-              {item.name}
-            </Text>
+        <View style={{gap: 10, width: '80%'}}>
+          <View
+            style={[
+              styles.itemDataRowContainer,
+              {justifyContent: 'space-between'},
+            ]}>
+            <View>
+              <Text
+                variant="headlineMedium"
+                style={
+                  item.isFixed ? styles.nameTextFixed : styles.nameTitleText
+                }>
+                {item.name}
+              </Text>
+            </View>
+            <View style={{alignSelf: 'flex-end'}}>
+              {item.date !== undefined && (
+                <Text
+                  variant="titleLarge"
+                  style={{
+                    color: item.isFixed
+                      ? globalColors.background
+                      : globalColors.grey,
+                  }}>
+                  {date}
+                </Text>
+              )}
+            </View>
           </View>
           <View style={styles.itemDataRowContainer}>
             <Text
@@ -67,18 +96,14 @@ export const ExpenseCard = ({
           <View style={{flexDirection: 'row', gap: 20}}>
             {item.category && (
               <View style={[styles.itemDataRowContainer, styles.category]}>
-                <Text
-                  variant="titleMedium"
-                  style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+                <Text variant="titleMedium" style={styles.nameText}>
                   {item.category}
                 </Text>
               </View>
             )}
             {item.tag && (
               <View style={[styles.itemDataRowContainer, styles.tag]}>
-                <Text
-                  variant="titleMedium"
-                  style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
+                <Text variant="titleMedium" style={styles.nameText}>
                   {item.tag}
                 </Text>
               </View>

@@ -137,6 +137,24 @@ export const styleListExpenses = StyleSheet.create({
   categoryItemText: {
     marginLeft: 10,
   },
+  datePickerContainer: {
+    marginBottom: 15,
+    gap: 10,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderColor: globalColors.dark,
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  datePickerButtonText: {
+    color: globalColors.dark,
+  },
 });
 
 export const styleEditExpenses = StyleSheet.create({

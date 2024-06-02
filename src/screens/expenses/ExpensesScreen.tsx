@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import DropDown from 'react-native-paper-dropdown';
 import { styleListExpenses } from './style';
 import { showToastError, showToastSuccess } from '../../utils/ToastActions';
+import DatePicker from 'react-native-date-picker';
 
 export const ExpensesScreen = () => {
   const [showDropDownCategories, setShowDropDownCategories] = useState(false);
@@ -46,9 +47,11 @@ export const ExpensesScreen = () => {
   const [newTag, setNewTag] = useState('');
   const [tagList, setTagList] = useState([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
 
   const [expense, setExpense] = useState<Expense>({
-    id: Date.now(),
+    id: Date.now() * Math.floor(Math.random() * 100) + 10,
     name: '',
     description: '',
     amount: 0,
@@ -56,6 +59,7 @@ export const ExpensesScreen = () => {
     category: '',
     isFixed: false,
     tag: '',
+    date: new Date(),
   });
   const [checked, setChecked] = React.useState(false);
 
@@ -67,13 +71,14 @@ export const ExpensesScreen = () => {
       await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
 
       setExpense({
-        id: Date.now(),
+        id: Date.now() * Math.floor(Math.random() * 100) + 10,
         name: '',
         description: '',
         amount: 0,
         expirationDate: undefined,
         category: '',
         isFixed: checked,
+        date: new Date(),
       });
       showToastSuccess('Gasto añadido!', '');
     } catch (error) {
@@ -97,10 +102,7 @@ export const ExpensesScreen = () => {
       const storedTags = await AsyncStorage.getItem('tags');
       const tags = storedTags ? JSON.parse(storedTags) : [];
       const updatedCategories = [...tags, newTagItem];
-      await AsyncStorage.setItem(
-        'tags',
-        JSON.stringify(updatedCategories),
-      );
+      await AsyncStorage.setItem('tags', JSON.stringify(updatedCategories));
       setTagList(prevTag => [...prevTag, newTagItem]);
       setNewTag('');
       hideModalFinished();
@@ -164,9 +166,10 @@ export const ExpensesScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTag]);
 
-  useEffect(()=>{
-    console.log("gasto fijo es??", checked);
-  },[]);
+  useEffect(() => {
+    setExpense({ ...expense, date: date });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date]);
 
   return (
     <View style={styleListExpenses.container}>
@@ -215,6 +218,30 @@ export const ExpensesScreen = () => {
               style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
+            />
+          </View>
+          <View style={[styleListExpenses.inputContainer, {marginBottom: 10}]}>
+            <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
+              Fecha
+            </Text>
+            <Pressable onPress={() => setOpen(true)} style={styleListExpenses.datePickerButton}>
+              <Text style={styleListExpenses.datePickerButtonText}>
+                {date.toDateString()}
+              </Text>
+              <Icon name="calendar" size={24} color={globalColors.primary} />
+            </Pressable>
+            <DatePicker
+              modal
+              open={open}
+              date={date}
+              onConfirm={(date) => {
+                setOpen(false);
+                setDate(date);
+              }}
+              onCancel={() => {
+                setOpen(false);
+              }}
+              mode="date"
             />
           </View>
           <View style={[styleListExpenses.inputContainer, {marginBottom: 10}]}>
@@ -311,7 +338,7 @@ export const ExpensesScreen = () => {
               color={globalColors.background}
               onPress={() => {
                 setChecked(!checked);
-                setExpense({ ...expense, isFixed: !checked });
+                setExpense({...expense, isFixed: !checked});
               }}
             />
           </View>

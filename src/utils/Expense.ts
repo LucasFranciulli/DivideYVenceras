@@ -7,4 +7,5 @@ export interface Expense {
   category?: string;
   isFixed: boolean;
   tag?: string;
+  date: Date;
 }

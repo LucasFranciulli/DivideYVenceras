@@ -27,11 +27,26 @@ export const EditExpensesScreen = () => {
     expirationDate: item.expirationDate,
     category: item.category,
     isFixed: item.isFixed,
+    tag: item.tag,
+    date: item.date,
   });
   const [checked, setChecked] = React.useState(item.isFixed);
-  const [showDropDown, setShowDropDown] = useState(false);
+  const [showDropDownCategories, setShowDropDownCategories] = useState(false);
+  const [showDropDownTags, setShowDropDownTags] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(item.category);
-  const [categoriesList, setCategoriesList] = useState([]);
+  const [currentTag, setCurrentTag] = useState(item.tag);
+  const [categoriesList, setCategoriesList] = useState([
+    {label: 'Comida', value: 'comida'},
+    {label: 'Ropa', value: 'ropa'},
+    {label: 'Higiene', value: 'higiene'},
+    {label: 'Tecnología', value: 'tecnologia'},
+    {label: 'Bebidas', value: 'bebidas'},
+    {label: 'Farmacia', value: 'farmacia'},
+    {label: 'Entretenimiento', value: 'entretenimiento'},
+    {label: 'Otro', value: 'otro'},
+  ]);
+
+  const [tagsList, setTagsList] = useState([]);
 
   const updateExpense = async () => {
     try {
@@ -57,18 +72,18 @@ export const EditExpensesScreen = () => {
   };
 
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadTags = async () => {
       try {
-        const storedCategories = await AsyncStorage.getItem('categories');
-        if (storedCategories) {
-          setCategoriesList(JSON.parse(storedCategories));
+        const storedTags = await AsyncStorage.getItem('tags');
+        if (storedTags) {
+          setTagsList(JSON.parse(storedTags));
         }
       } catch (error) {
-        console.error('Error loading categories:', error);
+        console.error('Error loading tags:', error);
       }
     };
 
-    loadCategories();
+    loadTags();
   }, []);
 
   return (
@@ -140,9 +155,9 @@ export const EditExpensesScreen = () => {
           <DropDown
             mode={'outlined'}
             placeholder="Categoría"
-            visible={showDropDown}
-            showDropDown={() => setShowDropDown(true)}
-            onDismiss={() => setShowDropDown(false)}
+            visible={showDropDownCategories}
+            showDropDown={() => setShowDropDownCategories(true)}
+            onDismiss={() => setShowDropDownCategories(false)}
             value={currentCategory}
             setValue={text => {
               setCurrentCategory(text);
@@ -161,12 +176,24 @@ export const EditExpensesScreen = () => {
           <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
             Tag
           </Text>
-          <TextInput
-            value={expense.tag}
-            onChangeText={text => setExpense({...expense, tag: text})}
-            style={styleEditExpenses.inputButtons}
-            underlineColor="transparent"
-            activeUnderlineColor="transparent"
+          <DropDown
+            mode={'outlined'}
+            placeholder="Tags"
+            visible={showDropDownTags}
+            showDropDown={() => setShowDropDownTags(true)}
+            onDismiss={() => setShowDropDownTags(false)}
+            value={currentTag}
+            setValue={text => {
+              setCurrentTag(text);
+              setExpense({...expense, tag: text});
+            }}
+            list={tagsList}
+            dropDownStyle={styleEditExpenses.dropDownStyle}
+            dropDownItemSelectedStyle={styleEditExpenses.dropDownItemSelectedStyle}
+            dropDownItemStyle={styleEditExpenses.dropDownItemStyle}
+            dropDownItemTextStyle={styleEditExpenses.dropDownItemTextStyle}
+            activeColor={globalColors.background}
+            inputProps={[styleEditExpenses.inputButtons, styleEditExpenses.dropdown]}
           />
         </View>
       </View>
