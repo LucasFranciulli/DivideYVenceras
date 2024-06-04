@@ -9,16 +9,16 @@ interface GroupCardProps {
   id: number;
   name: string;
   color: string;
-  onLeaveGroup: (id: number) => void;
+  seeTheGroup: (id: number) => void;
 }
 
-const GroupCard: React.FC<GroupCardProps> = ({ id, name, color, onLeaveGroup }) => {
+const GroupCard: React.FC<GroupCardProps> = ({ id, name, color, seeTheGroup }) => {
   return (
     <View style={styles.groupItem}>
       <View style={[styles.colorIndicator, { backgroundColor: color }]} />
       <Text style={styles.groupName}>{name}</Text>
-      <Pressable onPress={() => onLeaveGroup(id)}>
-        <Icon name="exit-outline" size={25} color="red" />
+      <Pressable onPress={() => seeTheGroup(id)}>
+        <Icon name="ellipsis-horizontal-outline" size={25} />
       </Pressable>
     </View>
   );

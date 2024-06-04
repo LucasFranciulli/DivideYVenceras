@@ -1,8 +1,18 @@
 import { StyleSheet } from "react-native";
 import { globalColors } from "../../themes/theme";
 
+export const stylesViewGroup = StyleSheet.create({
+  container: {
+    container: {
+      height: '100%',
+      width: '100%',
+      paddingHorizontal: 20,
+      paddingVertical: 20,
+    },
+  }
+});
 
-export const styles = StyleSheet.create({
+export const stylesListGroups = StyleSheet.create({
     container: {
       height: '100%',
       width: '100%',

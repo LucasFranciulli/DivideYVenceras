@@ -6,7 +6,15 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Group } from '../../utils/Group';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GroupCard from '../../components/groups/GroupCard';
-import { styles } from './style';
+import { stylesListGroups } from './style';
+import { useNavigation } from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../App';
+
+export type GroupViewScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'GroupViewScreen'
+>;
 
 export const GroupsScreen = () => {
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
@@ -16,6 +24,7 @@ export const GroupsScreen = () => {
     name: '',
     color: '',
   });
+  const navigation = useNavigation<GroupViewScreenNavigationProp>();
 
   const showModalFinished = () => setVisibleModalFinished(true);
   const hideModalFinished = () => setVisibleModalFinished(false);
@@ -63,31 +72,31 @@ export const GroupsScreen = () => {
   }, []);
 
   const renderGroupItem = ({ item }: { item: Group }) => (
-    <GroupCard id={item.id} name={item.name} color={item.color} onLeaveGroup={(id: number) => {
+    <GroupCard id={item.id} name={item.name} color={item.color} seeTheGroup={(id: number) => {
       setIdDelete(id);
-      showModalDelete();
+      navigation.navigate("GroupViewScreen");
     }} />
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text variant="displayLarge" style={styles.title}>
+    <View style={stylesListGroups.container}>
+      <View style={stylesListGroups.titleContainer}>
+        <Text variant="displayLarge" style={stylesListGroups.title}>
           Grupos
         </Text>
-        <Pressable style={styles.createGroup} onPress={showModalFinished}>
-          <Text variant="titleMedium" style={styles.titleButton}>
+        <Pressable style={stylesListGroups.createGroup} onPress={showModalFinished}>
+          <Text variant="titleMedium" style={stylesListGroups.titleButton}>
             Crear grupo
           </Text>
           <Icon name={'add-outline'} size={25} color={globalColors.background} />
         </Pressable>
       </View>
       <View>
-        <Text variant="headlineMedium" style={styles.title}>
+        <Text variant="headlineMedium" style={stylesListGroups.title}>
           Mis Grupos
         </Text>
         {groups.length === 0 ? (
-          <Text style={styles.noDataText}>No hay información de grupos.</Text>
+          <Text style={stylesListGroups.noDataText}>No hay información de grupos.</Text>
         ) : (
           <FlatList
             data={groups}
@@ -100,46 +109,46 @@ export const GroupsScreen = () => {
         <Modal
           visible={visibleModalFinished}
           onDismiss={hideModalFinished}
-          contentContainerStyle={styles.containerStyle}>
-          <View style={styles.modalContainer}>
-            <Text variant="titleLarge" style={styles.nameTitleModal}>
+          contentContainerStyle={stylesListGroups.containerStyle}>
+          <View style={stylesListGroups.modalContainer}>
+            <Text variant="titleLarge" style={stylesListGroups.nameTitleModal}>
               Crear Grupo
             </Text>
-            <Text variant="titleMedium" style={styles.nameBodyModal}>
+            <Text variant="titleMedium" style={stylesListGroups.nameBodyModal}>
               Nombre del grupo
             </Text>
             <TextInput
               placeholder="Nombre"
               value={group.name}
               onChangeText={text => setGroup({ ...group, name: text })}
-              style={styles.inputButtons}
+              style={stylesListGroups.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
             />
-            <Text variant="titleMedium" style={styles.nameBodyModal}>
+            <Text variant="titleMedium" style={stylesListGroups.nameBodyModal}>
               Color del grupo
             </Text>
-            <View style={styles.colors}>
+            <View style={stylesListGroups.colors}>
               {['red', 'blue', 'purple', 'green', 'yellow'].map(color => (
                 <Pressable
                   key={color}
                   onPress={() => setGroup({ ...group, color: color })}
                   style={[
-                    styles.colorCircle,
+                    stylesListGroups.colorCircle,
                     { backgroundColor: color },
-                    group.color === color && styles.selectedColorCircle,
+                    group.color === color && stylesListGroups.selectedColorCircle,
                   ]}
                 />
               ))}
             </View>
-            <View style={styles.buttomModalButtons}>
+            <View style={stylesListGroups.buttomModalButtons}>
               <Button onPress={saveGroup}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
                   Crear
                 </Text>
               </Button>
               <Button onPress={hideModalFinished}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>
@@ -151,26 +160,26 @@ export const GroupsScreen = () => {
         <Modal
           visible={visibleModalDelete}
           onDismiss={hideModalDelete}
-          contentContainerStyle={styles.containerStyle}>
-          <View style={styles.modalContainer}>
-            <Text variant="titleLarge" style={styles.nameTitleModal}>
+          contentContainerStyle={stylesListGroups.containerStyle}>
+          <View style={stylesListGroups.modalContainer}>
+            <Text variant="titleLarge" style={stylesListGroups.nameTitleModal}>
               Salir del Grupo
             </Text>
-            <Text variant="titleMedium" style={styles.nameBodyModal}>
+            <Text variant="titleMedium" style={stylesListGroups.nameBodyModal}>
               ¿Desea salir del grupo?
             </Text>
-            <View style={styles.buttomModalButtons}>
+            <View style={stylesListGroups.buttomModalButtons}>
               <Button
                 onPress={() => {
                   deleteGroup(IdDelete);
                   hideModalDelete();
                 }}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
                   Salir
                 </Text>
               </Button>
               <Button onPress={hideModalDelete}>
-                <Text variant="titleMedium" style={styles.nameTitleModal}>
+                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>

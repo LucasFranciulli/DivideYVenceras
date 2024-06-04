@@ -12,6 +12,7 @@ import {BottomTabsHomeNavigator} from './src/navigation/BottomHomeTabsNavigation
 import {EditExpensesScreen} from './src/screens/expenses/EditExpensesScreen';
 import {Expense} from './src/utils/Expense';
 import {EditExpensesScreenNavigationProp} from './src/screens/profile/ProfileScreen';
+import { GroupViewScreen } from './src/screens/groups/GroupViewScreen';
 
 export type RootStackParamList = {
   LoginScreen: undefined;
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   HomeScreen: undefined;
   EditExpenses: {item: Expense; navigation: EditExpensesScreenNavigationProp};
   BottomTabsHomeNavigator: undefined;
+  GroupViewScreen: undefined;
 };
 
 function App(): React.JSX.Element {
@@ -55,6 +57,13 @@ function App(): React.JSX.Element {
           <Stack.Screen
             name="EditExpenses"
             component={EditExpensesScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="GroupViewScreen"
+            component={GroupViewScreen}
             options={{
               headerShown: false,
             }}
