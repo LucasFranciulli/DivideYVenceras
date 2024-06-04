@@ -12,6 +12,7 @@ import {Expense} from '../../utils/Expense';
 import {PieChart, LineChart, BarChart} from 'react-native-chart-kit';
 import {globalColors} from '../../themes/theme';
 import { chartConfig, styles } from './style';
+import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 const screenWidth = Dimensions.get('window').width;
 
