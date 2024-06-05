@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
       backgroundColor: globalColors.primary,
     },
     filterButtonText: {
-      color: globalColors.text,
+      color: globalColors.grey,
     },
     activeFilterButtonText: {
       color: globalColors.background,

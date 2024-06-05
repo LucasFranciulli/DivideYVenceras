@@ -182,7 +182,7 @@ export const ExpensesScreen = () => {
           </View>
           <View style={styleListExpenses.inputContainer}>
             <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
-              Descipción
+              Descripción
             </Text>
             <TextInput
               placeholder="Descripción"
