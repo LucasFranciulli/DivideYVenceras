@@ -11,9 +11,9 @@ import { useNavigation } from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../App';
 
-export type GroupViewScreenNavigationProp = NativeStackNavigationProp<
+export type GroupsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
-  'GroupViewScreen'
+  'ListGroups'
 >;
 
 export const GroupsScreen = () => {
@@ -21,10 +21,13 @@ export const GroupsScreen = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [group, setGroup] = useState<Group>({
     id: Date.now(),
-    name: '',
+    nombre: '',
     color: '',
+    limite_gasto: 0,
+    monto_gastado: 0,
+    usuarios: []
   });
-  const navigation = useNavigation<GroupViewScreenNavigationProp>();
+  const navigation = useNavigation<GroupsScreenNavigationProp>();
 
   const showModalFinished = () => setVisibleModalFinished(true);
   const hideModalFinished = () => setVisibleModalFinished(false);
@@ -50,18 +53,20 @@ export const GroupsScreen = () => {
       const newGroups = [...groups, group];
       await AsyncStorage.setItem('groups', JSON.stringify(newGroups));
       setGroups(newGroups);
-      setGroup({ id: Date.now(), name: '', color: '' });
+      setGroup({ id: Date.now(), nombre: '', color: '', limite_gasto: 0, monto_gastado: 0, usuarios: [] });
       hideModalFinished();
     } catch (error) {
       console.error('Error saving group:', error);
     }
   };
 
-  const deleteGroup = async (id: number) => {
+  const exitGroup = async (id: number) => {
     try {
+      console.log(id)
       const filteredGroups = groups.filter(g => g.id !== id);
       await AsyncStorage.setItem('groups', JSON.stringify(filteredGroups));
       setGroups(filteredGroups);
+
     } catch (error) {
       console.error('Error deleting group:', error);
     }
@@ -72,9 +77,9 @@ export const GroupsScreen = () => {
   }, []);
 
   const renderGroupItem = ({ item }: { item: Group }) => (
-    <GroupCard id={item.id} name={item.name} color={item.color} seeTheGroup={(id: number) => {
+    <GroupCard id={item.id} name={item.nombre} color={item.color} seeTheGroup={(id: number) => {
       setIdDelete(id);
-      navigation.navigate("GroupViewScreen");
+      navigation.navigate("GroupView", {group: item, exitGroup, navigation});
     }} />
   );
 
@@ -119,8 +124,8 @@ export const GroupsScreen = () => {
             </Text>
             <TextInput
               placeholder="Nombre"
-              value={group.name}
-              onChangeText={text => setGroup({ ...group, name: text })}
+              value={group.nombre}
+              onChangeText={text => setGroup({ ...group, nombre: text })}
               style={stylesListGroups.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -171,7 +176,7 @@ export const GroupsScreen = () => {
             <View style={stylesListGroups.buttomModalButtons}>
               <Button
                 onPress={() => {
-                  deleteGroup(IdDelete);
+                  exitGroup(IdDelete);
                   hideModalDelete();
                 }}>
                 <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>

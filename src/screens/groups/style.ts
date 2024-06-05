@@ -3,13 +3,68 @@ import { globalColors } from "../../themes/theme";
 
 export const stylesViewGroup = StyleSheet.create({
   container: {
-    container: {
-      height: '100%',
-      width: '100%',
-      paddingHorizontal: 20,
-      paddingVertical: 20,
-    },
-  }
+    height: '100%',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    color: globalColors.primary,
+    paddingBottom: 50,
+    paddingTop: 50,
+    alignSelf: 'flex-start',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  userList: {
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  userItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  userItemBullet: {
+    fontSize: 28,
+    marginRight: 12,
+    color: globalColors.primary,
+  },
+  userItemText: {
+    fontSize: 22,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
 });
 
 export const stylesListGroups = StyleSheet.create({

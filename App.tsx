@@ -13,6 +13,8 @@ import {EditExpensesScreen} from './src/screens/expenses/EditExpensesScreen';
 import {Expense} from './src/utils/Expense';
 import {EditExpensesScreenNavigationProp} from './src/screens/profile/ProfileScreen';
 import { GroupViewScreen } from './src/screens/groups/GroupViewScreen';
+import { Group } from './src/utils/Group';
+import GroupsScreen, { GroupsScreenNavigationProp } from './src/screens/groups/GroupsScreen';
 
 export type RootStackParamList = {
   LoginScreen: undefined;
@@ -20,7 +22,8 @@ export type RootStackParamList = {
   HomeScreen: undefined;
   EditExpenses: {item: Expense; navigation: EditExpensesScreenNavigationProp};
   BottomTabsHomeNavigator: undefined;
-  GroupViewScreen: undefined;
+  GroupView: {group: Group, exitGroup: (id: number) => Promise<void>, navigation: GroupsScreenNavigationProp};
+  ListGroups: undefined;
 };
 
 function App(): React.JSX.Element {
@@ -62,8 +65,15 @@ function App(): React.JSX.Element {
             }}
           />
           <Stack.Screen
-            name="GroupViewScreen"
+            name="GroupView"
             component={GroupViewScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ListGroups"
+            component={GroupsScreen}
             options={{
               headerShown: false,
             }}
