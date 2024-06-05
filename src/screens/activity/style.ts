@@ -3,28 +3,51 @@ import { globalColors } from "../../themes/theme";
 
 export const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: globalColors.background,
+      flex: 1,
+      backgroundColor: globalColors.background,
     },
     title: {
-        paddingVertical: 30,
-        alignSelf: 'center',
-        color: globalColors.primary,
-    },
-    chartContainer: {
-        marginVertical: 10,
-        alignItems: 'center',
-    },
-    chartTitle: {
-        color: globalColors.secondary,
+      textAlign: 'center',
+      marginVertical: 20,
+      color: globalColors.primary,
     },
     noDataText: {
-        alignSelf: 'center',
-        marginTop: 20,
-        fontSize: 18,
-        color: '#666',
+      textAlign: 'center',
+      color: globalColors.text,
     },
-});
+    chartContainer: {
+      marginVertical: 10,
+      marginHorizontal: 20,
+    },
+    chartTitle: {
+      textAlign: 'center',
+      marginBottom: 10,
+      color: globalColors.primary,
+    },
+    filterContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginVertical: 10,
+    },
+    filterButton: {
+      marginHorizontal: 5,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 30,
+      borderWidth: 2,
+      borderColor: globalColors.secondary,
+    },
+    activeFilterButton: {
+      backgroundColor: globalColors.primary,
+    },
+    filterButtonText: {
+      color: globalColors.text,
+    },
+    activeFilterButtonText: {
+      color: globalColors.background,
+    },
+  });
+  
 
 export const chartConfig = {
     backgroundGradientFrom: '#ffffff',

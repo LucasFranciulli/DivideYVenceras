@@ -1,16 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
   View,
   Dimensions,
   RefreshControl,
+  Pressable
 } from 'react-native';
-import {Text} from 'react-native-paper';
+import { Text, Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Expense} from '../../utils/Expense';
-import {PieChart, LineChart, BarChart} from 'react-native-chart-kit';
-import {globalColors} from '../../themes/theme';
+import { Expense } from '../../utils/Expense';
+import { PieChart, LineChart, BarChart } from 'react-native-chart-kit';
+import { globalColors } from '../../themes/theme';
 import { chartConfig, styles } from './style';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
@@ -18,7 +19,9 @@ const screenWidth = Dimensions.get('window').width;
 
 export const ActivityScreen = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState('week');
 
   const fetchExpenses = async () => {
     try {
@@ -37,6 +40,38 @@ export const ActivityScreen = () => {
     fetchExpenses();
   }, []);
 
+  useEffect(() => {
+    applyFilter();
+  }, [expenses, filter]);
+
+  const applyFilter = () => {
+    const now = new Date();
+    let filtered = [];
+    switch (filter) {
+      case 'week':
+        filtered = expenses.filter(expense => {
+          const expenseDate = new Date(expense.date);
+          return now - expenseDate <= 7 * 24 * 60 * 60 * 1000;
+        });
+        break;
+      case 'month':
+        filtered = expenses.filter(expense => {
+          const expenseDate = new Date(expense.date);
+          return now - expenseDate <= 30 * 24 * 60 * 60 * 1000;
+        });
+        break;
+      case 'year':
+        filtered = expenses.filter(expense => {
+          const expenseDate = new Date(expense.date);
+          return now - expenseDate <= 365 * 24 * 60 * 60 * 1000;
+        });
+        break;
+      default:
+        filtered = expenses;
+    }
+    setFilteredExpenses(filtered);
+  };
+
   const generateRandomColor = () => {
     let color = '#';
     while (color.length < 7) {
@@ -46,9 +81,9 @@ export const ActivityScreen = () => {
   };
 
   const getCategoryData = () => {
-    const categoryMap: {[key: string]: number} = {};
+    const categoryMap: { [key: string]: number } = {};
 
-    expenses.forEach(expense => {
+    filteredExpenses.forEach(expense => {
       if (expense.category) {
         if (!categoryMap[expense.category]) {
           categoryMap[expense.category] = 0;
@@ -67,9 +102,9 @@ export const ActivityScreen = () => {
   };
 
   const getTagsData = () => {
-    const TagMap: {[key: string]: number} = {};
+    const TagMap: { [key: string]: number } = {};
 
-    expenses.forEach(expense => {
+    filteredExpenses.forEach(expense => {
       if (expense.tag) {
         if (!TagMap[expense.tag]) {
           TagMap[expense.tag] = 0;
@@ -89,7 +124,7 @@ export const ActivityScreen = () => {
 
   const getTotalAmountData = () => {
     let totalAmount = 0;
-    const data = expenses.map(expense => {
+    const data = filteredExpenses.map(expense => {
       totalAmount += expense.amount;
       return totalAmount;
     });
@@ -97,10 +132,10 @@ export const ActivityScreen = () => {
   };
 
   const getFixedVsNonFixedData = () => {
-    const fixedTotal = expenses
+    const fixedTotal = filteredExpenses
       .filter(expense => expense.isFixed)
       .reduce((total, expense) => total + expense.amount, 0);
-    const nonFixedTotal = expenses
+    const nonFixedTotal = filteredExpenses
       .filter(expense => !expense.isFixed)
       .reduce((total, expense) => total + expense.amount, 0);
     return {
@@ -129,7 +164,57 @@ export const ActivityScreen = () => {
       <Text variant="displayLarge" style={styles.title}>
         Resumen de Gastos
       </Text>
-      {expenses.length === 0 ? (
+      <View style={styles.filterContainer}>
+        <Pressable
+          style={[
+            styles.filterButton,
+            filter === 'week' && styles.activeFilterButton,
+          ]}
+          onPress={() => setFilter('week')}
+        >
+          <Text
+            style={[
+              styles.filterButtonText,
+              filter === 'week' && styles.activeFilterButtonText,
+            ]}
+          >
+            Última Semana
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[
+            styles.filterButton,
+            filter === 'month' && styles.activeFilterButton,
+          ]}
+          onPress={() => setFilter('month')}
+        >
+          <Text
+            style={[
+              styles.filterButtonText,
+              filter === 'month' && styles.activeFilterButtonText,
+            ]}
+          >
+            Último Mes
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[
+            styles.filterButton,
+            filter === 'year' && styles.activeFilterButton,
+          ]}
+          onPress={() => setFilter('year')}
+        >
+          <Text
+            style={[
+              styles.filterButtonText,
+              filter === 'year' && styles.activeFilterButtonText,
+            ]}
+          >
+            Último Año
+          </Text>
+        </Pressable>
+      </View>
+      {filteredExpenses.length === 0 ? (
         <Text style={styles.noDataText}>No hay información de gastos.</Text>
       ) : (
         <>
@@ -169,7 +254,7 @@ export const ActivityScreen = () => {
             </Text>
             <LineChart
               data={{
-                labels: expenses.map(expense =>
+                labels: filteredExpenses.map(expense =>
                   new Date(expense.date).toLocaleDateString(),
                 ),
                 datasets: [
