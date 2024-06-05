@@ -1,16 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, ScrollView, Pressable, FlatList} from 'react-native';
-import {
-  Button,
-  Checkbox,
-  Modal,
-  Portal,
-  Text,
-  TextInput,
-} from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, ScrollView, Pressable, FlatList } from 'react-native';
+import { Button, Checkbox, Modal, Portal, Text, TextInput } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {globalColors} from '../../themes/theme';
-import {Expense} from '../../utils/Expense';
+import { globalColors } from '../../themes/theme';
+import { Expense } from '../../utils/Expense';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DropDown from 'react-native-paper-dropdown';
@@ -33,20 +26,18 @@ export const ExpensesScreen = () => {
   const hideModalRemove = () => setVisibleModalRemove(false);
 
   const [categoriesList, setCategoriesList] = useState([
-    {label: 'Comida', value: 'comida'},
-    {label: 'Ropa', value: 'ropa'},
-    {label: 'Higiene', value: 'higiene'},
-    {label: 'Tecnología', value: 'tecnologia'},
-    {label: 'Bebidas', value: 'bebidas'},
-    {label: 'Farmacia', value: 'farmacia'},
-    {label: 'Entretenimiento', value: 'entretenimiento'},
-    {label: 'Otro', value: 'otro'},
+    { label: 'Comida', value: 'comida' },
+    { label: 'Ropa', value: 'ropa' },
+    { label: 'Higiene', value: 'higiene' },
+    { label: 'Tecnología', value: 'tecnologia' },
+    { label: 'Bebidas', value: 'bebidas' },
+    { label: 'Farmacia', value: 'farmacia' },
+    { label: 'Entretenimiento', value: 'entretenimiento' },
+    { label: 'Otro', value: 'otro' },
   ]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [tagList, setTagList] = useState([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
 
@@ -61,7 +52,7 @@ export const ExpensesScreen = () => {
     tag: '',
     date: new Date(),
   });
-  const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = useState(false);
 
   const addExpense = async () => {
     try {
@@ -89,7 +80,7 @@ export const ExpensesScreen = () => {
 
   const addTag = async () => {
     if (!newTag.trim()) {
-      showToastError('Error', 'La categoría no puede estar vacía');
+      showToastError('Error', 'El tag no puede estar vacío');
       return;
     }
 
@@ -101,48 +92,46 @@ export const ExpensesScreen = () => {
     try {
       const storedTags = await AsyncStorage.getItem('tags');
       const tags = storedTags ? JSON.parse(storedTags) : [];
-      const updatedCategories = [...tags, newTagItem];
-      await AsyncStorage.setItem('tags', JSON.stringify(updatedCategories));
+      const updatedTags = [...tags, newTagItem];
+      await AsyncStorage.setItem('tags', JSON.stringify(updatedTags));
       setTagList(prevTag => [...prevTag, newTagItem]);
       setNewTag('');
       hideModalFinished();
-      showToastSuccess('Categoría añadida!', '');
+      showToastSuccess('Tag añadido!', '');
     } catch (error) {
-      showToastError('Error', 'No se pudo agregar la categoría');
-      console.error('Error saving category:', error);
+      showToastError('Error', 'No se pudo agregar el tag');
+      console.error('Error saving tag:', error);
     }
   };
 
   const removeTag = async () => {
     try {
-      const storedTag = await AsyncStorage.getItem('tags');
-      let Tag = storedTag ? JSON.parse(storedTag) : [];
-      Tag = Tag.filter(
-        (category: any) => !selectedTags.includes(category.value),
-      );
-      await AsyncStorage.setItem('tag', JSON.stringify(Tag));
-      setTagList(Tag);
+      const storedTags = await AsyncStorage.getItem('tags');
+      let tags = storedTags ? JSON.parse(storedTags) : [];
+      tags = tags.filter((tag: any) => !selectedTags.includes(tag.value));
+      await AsyncStorage.setItem('tags', JSON.stringify(tags));
+      setTagList(tags);
       setSelectedTags([]);
       hideModalRemove();
       showToastSuccess('Tags eliminados!', '');
     } catch (error) {
       showToastError('Error', 'No se pudo eliminar los tags');
-      console.error('Error removing Tag:', error);
+      console.error('Error removing tags:', error);
     }
   };
 
-  const toggleCategorySelection = (categoryValue: string) => {
-    setSelectedCategories(prevSelected => {
-      if (prevSelected.includes(categoryValue)) {
-        return prevSelected.filter(value => value !== categoryValue);
+  const toggleTagSelection = (tagValue: string) => {
+    setSelectedTags(prevSelected => {
+      if (prevSelected.includes(tagValue)) {
+        return prevSelected.filter(value => value !== tagValue);
       } else {
-        return [...prevSelected, categoryValue];
+        return [...prevSelected, tagValue];
       }
     });
   };
 
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadTags = async () => {
       try {
         const storedTags = await AsyncStorage.getItem('tags');
         if (storedTags) {
@@ -153,22 +142,22 @@ export const ExpensesScreen = () => {
       }
     };
 
-    loadCategories();
+    loadTags();
   }, []);
 
   useEffect(() => {
-    setExpense({...expense, category: currentCategory});
+    setExpense({ ...expense, category: currentCategory });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCategory]);
 
   useEffect(() => {
-    setExpense({...expense, tag: currentTag});
+    setExpense({ ...expense, tag: currentTag });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTag]);
 
   useEffect(() => {
     setExpense({ ...expense, date: date });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   return (
@@ -185,7 +174,7 @@ export const ExpensesScreen = () => {
             <TextInput
               placeholder="Nombre"
               value={expense.name}
-              onChangeText={text => setExpense({...expense, name: text})}
+              onChangeText={text => setExpense({ ...expense, name: text })}
               style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -198,7 +187,7 @@ export const ExpensesScreen = () => {
             <TextInput
               placeholder="Descripción"
               value={expense.description}
-              onChangeText={text => setExpense({...expense, description: text})}
+              onChangeText={text => setExpense({ ...expense, description: text })}
               style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -212,7 +201,7 @@ export const ExpensesScreen = () => {
               placeholder="Monto"
               value={expense.amount.toString()}
               onChangeText={text =>
-                setExpense({...expense, amount: parseFloat(text)})
+                setExpense({ ...expense, amount: parseFloat(text) })
               }
               keyboardType="numeric"
               style={styleListExpenses.inputButtons}
@@ -220,7 +209,7 @@ export const ExpensesScreen = () => {
               activeUnderlineColor="transparent"
             />
           </View>
-          <View style={[styleListExpenses.inputContainer, {marginBottom: 10}]}>
+          <View style={[styleListExpenses.inputContainer, { marginBottom: 10 }]}>
             <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Fecha
             </Text>
@@ -244,7 +233,7 @@ export const ExpensesScreen = () => {
               mode="date"
             />
           </View>
-          <View style={[styleListExpenses.inputContainer, {marginBottom: 10}]}>
+          <View style={[styleListExpenses.inputContainer, { marginBottom: 10 }]}>
             <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Categoría
             </Text>
@@ -338,7 +327,7 @@ export const ExpensesScreen = () => {
               color={globalColors.background}
               onPress={() => {
                 setChecked(!checked);
-                setExpense({...expense, isFixed: !checked});
+                setExpense({ ...expense, isFixed: !checked });
               }}
             />
           </View>
@@ -357,7 +346,7 @@ export const ExpensesScreen = () => {
               Agregar nuevo Tag
             </Text>
             <TextInput
-              placeholder="Nombre de la nueva categoría"
+              placeholder="Nombre del nuevo tag"
               value={newTag}
               onChangeText={text => setNewTag(text)}
               style={styleListExpenses.inputButtons}
@@ -386,20 +375,20 @@ export const ExpensesScreen = () => {
           contentContainerStyle={styleListExpenses.containerStyle}>
           <View style={styleListExpenses.modalContainer}>
             <Text variant="titleLarge" style={styleListExpenses.nameTitleModal}>
-              Eliminar categoría
+              Eliminar Tags
             </Text>
             <FlatList
-              data={categoriesList}
+              data={tagList}
               keyExtractor={item => item.value}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <View style={styleListExpenses.categoryItem}>
                   <Checkbox
                     status={
-                      selectedCategories.includes(item.value)
+                      selectedTags.includes(item.value)
                         ? 'checked'
                         : 'unchecked'
                     }
-                    onPress={() => toggleCategorySelection(item.value)}
+                    onPress={() => toggleTagSelection(item.value)}
                   />
                   <Text style={styleListExpenses.categoryItemText}>{item.label}</Text>
                 </View>

@@ -2,14 +2,15 @@ import React, {useEffect, useState} from 'react';
 import {Button, Checkbox, Text, TextInput} from 'react-native-paper';
 import {RootStackParamList} from '../../../App';
 import {RouteProp, useRoute} from '@react-navigation/native';
-import {StyleSheet, View} from 'react-native';
+import {Pressable, ScrollView, View} from 'react-native';
 import {globalColors} from '../../themes/theme';
 import {Expense} from '../../utils/Expense';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
+import DatePicker from 'react-native-date-picker';
 import DropDown from 'react-native-paper-dropdown';
 import { showToastError, showToastSuccess } from '../../utils/ToastActions';
 import { styleEditExpenses } from './style';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 type EditExpensesScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -45,6 +46,8 @@ export const EditExpensesScreen = () => {
     {label: 'Entretenimiento', value: 'entretenimiento'},
     {label: 'Otro', value: 'otro'},
   ]);
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState(new Date());
 
   const [tagsList, setTagsList] = useState([]);
 
@@ -91,6 +94,7 @@ export const EditExpensesScreen = () => {
       <Text variant="displayLarge" style={styleEditExpenses.title}>
         Editar Gasto
       </Text>
+      <ScrollView contentContainerStyle={styleEditExpenses.scrollViewContent}>
       <View style={styleEditExpenses.mainContainer}>
         <View style={styleEditExpenses.inputRowContainer}>
           <Text variant="headlineMedium" style={styleEditExpenses.inputTitle}>
@@ -148,6 +152,32 @@ export const EditExpensesScreen = () => {
             activeUnderlineColor="transparent"
           />
         </View>
+        <View style={styleEditExpenses.datePickerContainer}>
+            <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
+              Fecha
+            </Text>
+            <Pressable
+              onPress={() => setOpen(true)}
+              style={styleEditExpenses.datePickerButton}>
+              <Text style={styleEditExpenses.datePickerButtonText}>
+                {date.toDateString()}
+              </Text>
+              <Icon name="calendar" size={24} color={globalColors.primary} />
+            </Pressable>
+            <DatePicker
+              modal
+              open={open}
+              date={date}
+              onConfirm={date => {
+                setOpen(false);
+                setDate(date);
+              }}
+              onCancel={() => {
+                setOpen(false);
+              }}
+              mode="date"
+            />
+          </View>
         <View style={[styleEditExpenses.inputContainer, styleEditExpenses.drop]}>
           <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
             Categoría
@@ -197,6 +227,7 @@ export const EditExpensesScreen = () => {
           />
         </View>
       </View>
+      </ScrollView>
       <View style={styleEditExpenses.buttonContainer}>
         <Button mode="contained" onPress={updateExpense} style={styleEditExpenses.button}>
           Actualizar

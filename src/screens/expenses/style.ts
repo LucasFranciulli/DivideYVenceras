@@ -158,68 +158,90 @@ export const styleListExpenses = StyleSheet.create({
 });
 
 export const styleEditExpenses = StyleSheet.create({
-    container: {
-      height: '100%',
-      width: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 30,
-    },
-    mainContainer: {
-      width: '100%',
-    },
-    buttonContainer: {
-      paddingTop: 20,
-      width: '50%',
-    },
-    button: {
-      backgroundColor: globalColors.secondary,
-      width: '80%',
-      alignSelf: 'center',
-    },
-    title: {
-      color: globalColors.primary,
-      paddingBottom: 50,
-      alignSelf: 'flex-start',
-    },
-    inputButtons: {
-      borderColor: 'black',
-      borderWidth: 1,
-      backgroundColor: 'white',
-      marginBottom: 10,
-      borderRadius: 10,
-      borderTopLeftRadius: 10,
-      borderTopRightRadius: 10,
-    },
-    inputTitle: {
-      color: globalColors.primary,
-    },
-    inputContainer: {
-      gap: 10,
-    },
-    inputRowContainer: {
-      alignItems: 'center',
-      gap: 10,
-      paddingBottom: 20,
-      flexDirection: 'row',
-    },
-    dropDownStyle: {
-      backgroundColor: globalColors.background,
-    },
-    dropDownItemSelectedStyle: {
-      backgroundColor: globalColors.secondary,
-    },
-    dropDownItemStyle: {
-      backgroundColor: globalColors.background,
-    },
-    dropDownItemTextStyle: {
-      color: globalColors.dark,
-    },
-    dropdown: {
-      backgroundColor: globalColors.background,
-    },
-    drop: {
-      paddingBottom: 10,
-    },
-  });
-  
+  container: {
+    height: '100%',
+    width: '100%',
+    paddingHorizontal: 30,
+  },
+  mainContainer: {
+    width: '100%',
+  },
+  buttonContainer: {
+    paddingVertical: 40,
+    alignSelf: 'center',
+    width: '50%',
+  },
+  button: {
+    backgroundColor: globalColors.secondary,
+    width: '80%',
+    alignSelf: 'center',
+  },
+  title: {
+    color: globalColors.primary,
+    paddingBottom: 50,
+    alignSelf: 'flex-start',
+  },
+  inputButtons: {
+    borderColor: 'black',
+    borderWidth: 1,
+    backgroundColor: 'white',
+    marginBottom: 10,
+    borderRadius: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  inputTitle: {
+    color: globalColors.primary,
+  },
+  inputContainer: {
+    gap: 10,
+  },
+  inputRowContainer: {
+    alignItems: 'center',
+    gap: 10,
+    paddingBottom: 20,
+    flexDirection: 'row',
+  },
+  dropDownStyle: {
+    backgroundColor: globalColors.background,
+  },
+  dropDownItemSelectedStyle: {
+    backgroundColor: globalColors.secondary,
+  },
+  dropDownItemStyle: {
+    backgroundColor: globalColors.background,
+  },
+  dropDownItemTextStyle: {
+    color: globalColors.dark,
+  },
+  dropdown: {
+    backgroundColor: globalColors.background,
+  },
+  drop: {
+    paddingBottom: 10,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 15,
+  },
+  datePickerContainer: {
+    marginBottom: 15,
+    gap: 10,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderColor: globalColors.dark,
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  datePickerButtonText: {
+    color: globalColors.dark,
+  },
+});
