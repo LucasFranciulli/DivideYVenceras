@@ -1,19 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  View,
-  Dimensions,
-  RefreshControl,
-  Pressable
-} from 'react-native';
-import { Text, Button } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {ScrollView, View, Dimensions, RefreshControl} from 'react-native';
+import {Text} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Expense } from '../../utils/Expense';
-import { PieChart, LineChart, BarChart } from 'react-native-chart-kit';
-import { globalColors } from '../../themes/theme';
-import { chartConfig, styles } from './style';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
+import {Expense} from '../../utils/Expense';
+import {PieChart, LineChart, BarChart} from 'react-native-chart-kit';
+import {chartConfig, styles} from './style';
+import {Filters} from '../../components/filters/Filters';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -34,6 +26,10 @@ export const ActivityScreen = () => {
     } catch (error) {
       console.error('Error fetching expenses:', error);
     }
+  };
+
+  const handleSetFilter = (input: string) => {
+    setFilter(input);
   };
 
   useEffect(() => {
@@ -81,7 +77,7 @@ export const ActivityScreen = () => {
   };
 
   const getCategoryData = () => {
-    const categoryMap: { [key: string]: number } = {};
+    const categoryMap: {[key: string]: number} = {};
 
     filteredExpenses.forEach(expense => {
       if (expense.category) {
@@ -102,7 +98,7 @@ export const ActivityScreen = () => {
   };
 
   const getTagsData = () => {
-    const TagMap: { [key: string]: number } = {};
+    const TagMap: {[key: string]: number} = {};
 
     filteredExpenses.forEach(expense => {
       if (expense.tag) {
@@ -164,56 +160,7 @@ export const ActivityScreen = () => {
       <Text variant="displayLarge" style={styles.title}>
         Resumen de Gastos
       </Text>
-      <View style={styles.filterContainer}>
-        <Pressable
-          style={[
-            styles.filterButton,
-            filter === 'week' && styles.activeFilterButton,
-          ]}
-          onPress={() => setFilter('week')}
-        >
-          <Text
-            style={[
-              styles.filterButtonText,
-              filter === 'week' && styles.activeFilterButtonText,
-            ]}
-          >
-            Última Semana
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[
-            styles.filterButton,
-            filter === 'month' && styles.activeFilterButton,
-          ]}
-          onPress={() => setFilter('month')}
-        >
-          <Text
-            style={[
-              styles.filterButtonText,
-              filter === 'month' && styles.activeFilterButtonText,
-            ]}
-          >
-            Último Mes
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[
-            styles.filterButton,
-            filter === 'year' && styles.activeFilterButton,
-          ]}
-          onPress={() => setFilter('year')}
-        >
-          <Text
-            style={[
-              styles.filterButtonText,
-              filter === 'year' && styles.activeFilterButtonText,
-            ]}
-          >
-            Último Año
-          </Text>
-        </Pressable>
-      </View>
+      <Filters filter={filter} handleSetFilter={handleSetFilter} />
       {filteredExpenses.length === 0 ? (
         <Text style={styles.noDataText}>No hay información de gastos.</Text>
       ) : (

@@ -8,8 +8,9 @@ import {ExpenseCard} from '../../components/expense/ExpenseCard';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../App';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { styles } from './style';
-import { showToastError, showToastSuccess } from '../../utils/ToastActions';
+import {styles} from './style';
+import {showToastError, showToastSuccess} from '../../utils/ToastActions';
+import {Filters} from '../../components/filters/Filters';
 
 export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -19,6 +20,7 @@ export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
 export const ProfileScreen = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const navigation = useNavigation<EditExpensesScreenNavigationProp>();
+  const [filter, setFilter] = useState('week');
 
   useFocusEffect(
     React.useCallback(() => {
@@ -36,6 +38,10 @@ export const ProfileScreen = () => {
       fetchExpenses();
     }, []),
   );
+
+  const handleSetFilter = (input: string) => {
+    setFilter(input);
+  };
 
   const msjError = (message: string) => {
     showToastError('Error', message);
@@ -69,7 +75,7 @@ export const ProfileScreen = () => {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text variant="displayLarge" style={styles.title}>
-          Lista de Gastos
+          Gastos
         </Text>
         <Icon
           name={'log-out-outline'}
@@ -81,6 +87,7 @@ export const ProfileScreen = () => {
         <Text style={styles.noDataText}>No hay gastos.</Text>
       ) : (
         <>
+          <Filters filter={filter} handleSetFilter={handleSetFilter} />
           <View style={styles.circleContainer}>
             <View style={styles.circleContainerItem}>
               <View style={styles.circleFixed} />
