@@ -1,9 +1,7 @@
-// src/components/GroupCard.tsx
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
-import { Text } from 'react-native-paper';
+import {View, StyleSheet, Pressable} from 'react-native';
+import {Text} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { globalColors } from '../../themes/theme';
 
 interface GroupCardProps {
   id: number;
@@ -12,13 +10,20 @@ interface GroupCardProps {
   seeTheGroup: (id: number) => void;
 }
 
-const GroupCard: React.FC<GroupCardProps> = ({ id, name, color, seeTheGroup }) => {
+const GroupCard: React.FC<GroupCardProps> = ({
+  id,
+  name,
+  color,
+  seeTheGroup,
+}) => {
   return (
     <View style={styles.groupItem}>
-      <View style={[styles.colorIndicator, { backgroundColor: color }]} />
-      <Text style={styles.groupName}>{name}</Text>
-      <Pressable onPress={() => seeTheGroup(id)}>
-        <Icon name="ellipsis-horizontal-outline" size={25} />
+      <View style={[styles.colorIndicator, {backgroundColor: color}]} />
+      <Pressable style={styles.button} onPress={() => seeTheGroup(id)}>
+        <View style={styles.groupContent}>
+          <Text variant="titleLarge">{name}</Text>
+          <Icon name="chevron-forward-outline" size={25} />
+        </View>
       </Pressable>
     </View>
   );
@@ -28,21 +33,27 @@ const styles = StyleSheet.create({
   groupItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 50,
+    borderRadius: 10,
     marginVertical: 10,
+    height: 100,
   },
   colorIndicator: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginRight: 10,
+    width: 10,
+    height: '100%',
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
   },
-  groupName: {
+  groupContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
-    fontSize: 16,
+    paddingHorizontal: 10,
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
   },
 });
 

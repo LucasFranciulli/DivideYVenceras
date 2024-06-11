@@ -89,13 +89,6 @@ export const GroupViewScreen = () => {
             title="Salir del grupo"
           />
           <Divider />
-          {/* <Menu.Item
-            onPress={() => {
-              closeMenu();
-              navigation.navigate('ListGroups');
-            }}
-            title="Volver"
-          /> */}
         </Menu>
       </View>
       <FlatList

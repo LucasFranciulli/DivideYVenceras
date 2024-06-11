@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Pressable, StyleSheet, View, FlatList } from 'react-native';
-import { Button, Modal, Portal, Text, TextInput } from 'react-native-paper';
-import { globalColors } from '../../themes/theme';
+import React, {useState, useEffect} from 'react';
+import {Pressable, StyleSheet, View, FlatList} from 'react-native';
+import {Button, Modal, Portal, Text, TextInput} from 'react-native-paper';
+import {globalColors} from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Group } from '../../utils/Group';
+import {Group} from '../../utils/Group';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GroupCard from '../../components/groups/GroupCard';
-import { stylesListGroups } from './style';
-import { useNavigation } from '@react-navigation/native';
+import {stylesListGroups} from './style';
+import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../App';
+import {RootStackParamList} from '../../../App';
 
 export type GroupsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -25,7 +25,7 @@ export const GroupsScreen = () => {
     color: '',
     limite_gasto: 0,
     monto_gastado: 0,
-    usuarios: []
+    usuarios: [],
   });
   const navigation = useNavigation<GroupsScreenNavigationProp>();
 
@@ -53,7 +53,14 @@ export const GroupsScreen = () => {
       const newGroups = [...groups, group];
       await AsyncStorage.setItem('groups', JSON.stringify(newGroups));
       setGroups(newGroups);
-      setGroup({ id: Date.now(), nombre: '', color: '', limite_gasto: 0, monto_gastado: 0, usuarios: [] });
+      setGroup({
+        id: Date.now(),
+        nombre: '',
+        color: '',
+        limite_gasto: 0,
+        monto_gastado: 0,
+        usuarios: [],
+      });
       hideModalFinished();
     } catch (error) {
       console.error('Error saving group:', error);
@@ -62,11 +69,10 @@ export const GroupsScreen = () => {
 
   const exitGroup = async (id: number) => {
     try {
-      console.log(id)
+      console.log(id);
       const filteredGroups = groups.filter(g => g.id !== id);
       await AsyncStorage.setItem('groups', JSON.stringify(filteredGroups));
       setGroups(filteredGroups);
-
     } catch (error) {
       console.error('Error deleting group:', error);
     }
@@ -76,11 +82,16 @@ export const GroupsScreen = () => {
     fetchGroups();
   }, []);
 
-  const renderGroupItem = ({ item }: { item: Group }) => (
-    <GroupCard id={item.id} name={item.nombre} color={item.color} seeTheGroup={(id: number) => {
-      setIdDelete(id);
-      navigation.navigate("GroupView", {group: item, exitGroup, navigation});
-    }} />
+  const renderGroupItem = ({item}: {item: Group}) => (
+    <GroupCard
+      id={item.id}
+      name={item.nombre}
+      color={item.color}
+      seeTheGroup={(id: number) => {
+        setIdDelete(id);
+        navigation.navigate('GroupView', {group: item, exitGroup, navigation});
+      }}
+    />
   );
 
   return (
@@ -89,19 +100,38 @@ export const GroupsScreen = () => {
         <Text variant="displayLarge" style={stylesListGroups.title}>
           Grupos
         </Text>
-        <Pressable style={stylesListGroups.createGroup} onPress={showModalFinished}>
-          <Text variant="titleMedium" style={stylesListGroups.titleButton}>
-            Crear grupo
-          </Text>
-          <Icon name={'add-outline'} size={25} color={globalColors.background} />
-        </Pressable>
       </View>
       <View>
-        <Text variant="headlineMedium" style={stylesListGroups.title}>
-          Mis Grupos
-        </Text>
+        <View style={stylesListGroups.upperButtons}>
+          <Pressable
+            style={stylesListGroups.createGroup}
+            onPress={showModalFinished}>
+            <Text variant="titleMedium" style={stylesListGroups.titleButton}>
+              Crear grupo
+            </Text>
+            <Icon
+              name={'add-outline'}
+              size={25}
+              color={globalColors.background}
+            />
+          </Pressable>
+          <Pressable
+            style={stylesListGroups.joinGroup}
+            onPress={showModalFinished}>
+            <Text variant="titleMedium" style={stylesListGroups.titleButton}>
+              Unirse a grupo
+            </Text>
+            <Icon
+              name={'arrow-redo-circle-outline'}
+              size={30}
+              color={globalColors.background}
+            />
+          </Pressable>
+        </View>
         {groups.length === 0 ? (
-          <Text style={stylesListGroups.noDataText}>No hay información de grupos.</Text>
+          <Text style={stylesListGroups.noDataText}>
+            No hay información de grupos.
+          </Text>
         ) : (
           <FlatList
             data={groups}
@@ -125,7 +155,7 @@ export const GroupsScreen = () => {
             <TextInput
               placeholder="Nombre"
               value={group.nombre}
-              onChangeText={text => setGroup({ ...group, nombre: text })}
+              onChangeText={text => setGroup({...group, nombre: text})}
               style={stylesListGroups.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -137,23 +167,28 @@ export const GroupsScreen = () => {
               {['red', 'blue', 'purple', 'green', 'yellow'].map(color => (
                 <Pressable
                   key={color}
-                  onPress={() => setGroup({ ...group, color: color })}
+                  onPress={() => setGroup({...group, color: color})}
                   style={[
                     stylesListGroups.colorCircle,
-                    { backgroundColor: color },
-                    group.color === color && stylesListGroups.selectedColorCircle,
+                    {backgroundColor: color},
+                    group.color === color &&
+                      stylesListGroups.selectedColorCircle,
                   ]}
                 />
               ))}
             </View>
             <View style={stylesListGroups.buttomModalButtons}>
               <Button onPress={saveGroup}>
-                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
                   Crear
                 </Text>
               </Button>
               <Button onPress={hideModalFinished}>
-                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>
@@ -179,12 +214,16 @@ export const GroupsScreen = () => {
                   exitGroup(IdDelete);
                   hideModalDelete();
                 }}>
-                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
                   Salir
                 </Text>
               </Button>
               <Button onPress={hideModalDelete}>
-                <Text variant="titleMedium" style={stylesListGroups.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>
