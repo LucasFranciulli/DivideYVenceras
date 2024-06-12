@@ -1,32 +1,27 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Button,
-  FlatList,
-  Modal,
-  Pressable,
-  TextInput,
-  View,
-} from 'react-native';
+import {FlatList, Pressable, TextInput, View} from 'react-native';
 import {stylesViewGroup} from './style';
-import {Text, Menu, Divider} from 'react-native-paper';
+import {Text, Modal, Button} from 'react-native-paper';
 import {RootStackParamList} from '../../../App';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {User} from '../../utils/Users';
+import {globalColors} from '../../themes/theme';
 
 type GroupViewScreenRouteProp = RouteProp<RootStackParamList, 'GroupView'>;
 
 export const GroupViewScreen = () => {
   const route = useRoute<GroupViewScreenRouteProp>();
   const {group, exitGroup, navigation} = route.params;
-  const [visible, setVisible] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [users, setUsers] = useState<User[]>([]);
 
-  const openMenu = () => setVisible(true);
-  const closeMenu = () => setVisible(false);
+  const [showUsers, setShowUsers] = useState(false);
+  const handleShowUsers = () => {
+    setShowUsers(!showUsers);
+  };
 
   useEffect(() => {
     // Aquí puedes cargar los usuarios del grupo
@@ -60,61 +55,73 @@ export const GroupViewScreen = () => {
         <Text variant="displayLarge" style={stylesViewGroup.title}>
           {group.nombre}
         </Text>
-        <Menu
-          visible={visible}
-          onDismiss={closeMenu}
-          anchor={
-            <Pressable>
-              <Icon
-                name={'ellipsis-vertical-outline'}
-                size={24}
-                onPress={openMenu}
-              />
-            </Pressable>
-          }>
-          <Menu.Item
-            onPress={() => {
-              closeMenu();
-              setModalVisible(true);
-            }}
-            title="Agregar"
+        <Pressable
+          style={stylesViewGroup.addUsers}
+          onPress={() => setModalVisible(true)}>
+          <Text variant="titleMedium" style={stylesViewGroup.addButton}>
+            Agregar
+          </Text>
+          <Icon
+            name={'add-outline'}
+            size={25}
+            color={globalColors.background}
           />
-          <Divider />
-          <Menu.Item
-            onPress={() => {
-              closeMenu();
-              exitGroup(group.id);
-              navigation.navigate('ListGroups');
-            }}
-            title="Salir del grupo"
-          />
-          <Divider />
-        </Menu>
+        </Pressable>
+        <Icon
+          name={'log-out-outline'}
+          size={40}
+          onPress={() => {
+            exitGroup(group.id);
+            navigation.navigate('ListGroups');
+          }}
+        />
       </View>
-      <FlatList
-        data={users}
-        renderItem={renderUserItem}
-        keyExtractor={item => item.id.toString()}
-        style={stylesViewGroup.userList}
-      />
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={stylesViewGroup.modalContainer}>
-          <View style={stylesViewGroup.modalContent}>
-            <Text style={stylesViewGroup.modalTitle}>
-              ¿A quién deseas agregar?
-            </Text>
-            <TextInput
-              style={stylesViewGroup.input}
-              placeholder="Nombre del usuario"
-              value={newUserName}
-              onChangeText={setNewUserName}
+      <View style={stylesViewGroup.usersList}>
+        <View style={stylesViewGroup.userDropdown}>
+          <Icon
+            name={'people-circle-outline'}
+            size={40}
+            color={globalColors.primary}
+          />
+          <Text variant="titleLarge" style={{color: globalColors.dark}}>
+            Usuarios
+          </Text>
+          <Pressable onPress={() => handleShowUsers()}>
+            <Icon
+              name={showUsers ? 'chevron-down-outline' : 'chevron-up-outline'}
+              size={25}
+              color={globalColors.dark}
             />
-            <Button title="Agregar usuario" onPress={addUser} />
-          </View>
+          </Pressable>
+        </View>
+        {!showUsers && (
+          <FlatList
+            data={users}
+            renderItem={renderUserItem}
+            keyExtractor={item => item.id.toString()}
+            style={stylesViewGroup.userList}
+            ItemSeparatorComponent={<View style={stylesViewGroup.separetor}/>}
+          />
+        )}
+      </View>
+      <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
+        <View style={stylesViewGroup.modalContainer}>
+          <Text variant="titleLarge" style={{color: globalColors.primary}}>
+            ¿A quién deseas agregar?
+          </Text>
+          <TextInput
+            style={stylesViewGroup.input}
+            placeholder="Nombre del usuario"
+            value={newUserName}
+            onChangeText={setNewUserName}
+          />
+          <Pressable onPress={addUser} style={stylesViewGroup.addPressable}>
+            <Text
+              variant="titleMedium"
+              style={{color: globalColors.background}}>
+              Agregar usuario
+            </Text>
+          </Pressable>
         </View>
       </Modal>
     </View>

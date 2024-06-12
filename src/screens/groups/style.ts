@@ -1,12 +1,11 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
 import {globalColors} from '../../themes/theme';
 
+var {height, width} = Dimensions.get('window');
 export const stylesViewGroup = StyleSheet.create({
   container: {
     height: '100%',
     width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   title: {
     color: globalColors.primary,
@@ -17,7 +16,7 @@ export const stylesViewGroup = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
+    width: '100%',
     paddingHorizontal: 20,
     alignItems: 'center',
   },
@@ -29,6 +28,8 @@ export const stylesViewGroup = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 15,
+  },
+  separetor: {
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
@@ -41,10 +42,15 @@ export const stylesViewGroup = StyleSheet.create({
     fontSize: 22,
   },
   modalContainer: {
-    flex: 1,
+    width: width * 0.9,
+    height: height * 0.25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignSelf: 'center',
+    padding: 10,
+    borderRadius: 30,
+    gap: 20,
+    backgroundColor: globalColors.background,
   },
   modalContent: {
     width: '80%',
@@ -64,6 +70,39 @@ export const stylesViewGroup = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 20,
+  },
+  addUsers: {
+    borderRadius: 30,
+    width: 120,
+    height: 50,
+    backgroundColor: globalColors.secondary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+  },
+  addButton: {
+    color: globalColors.background,
+  },
+  usersList: {
+    alignItems: 'center',
+    width: '95%',
+    backgroundColor: globalColors.backgroundHighlited,
+    borderRadius: 20,
+    alignSelf: 'center',
+  },
+  userDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+  },
+  addPressable: {
+    backgroundColor: globalColors.secondary,
+    padding: 10,
+    borderRadius: 10,
   },
 });
 
