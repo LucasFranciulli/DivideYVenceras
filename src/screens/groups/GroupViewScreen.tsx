@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { FlatList, Pressable, TextInput, View } from 'react-native';
-import { stylesViewGroup } from './style';
-import { Text, Modal, Button } from 'react-native-paper';
-import { RootStackParamList } from '../../../App';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {FlatList, Pressable, TextInput, View} from 'react-native';
+import {stylesViewGroup} from './style';
+import {Text, Modal, Button} from 'react-native-paper';
+import {RootStackParamList} from '../../../App';
+import {RouteProp, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { User } from '../../utils/Users';
-import { globalColors } from '../../themes/theme';
+import {User} from '../../utils/Users';
+import {globalColors} from '../../themes/theme';
 
 type GroupViewScreenRouteProp = RouteProp<RootStackParamList, 'GroupView'>;
 
 export const GroupViewScreen = () => {
   const route = useRoute<GroupViewScreenRouteProp>();
-  const { group, exitGroup, updateGroupUsers, navigation } = route.params;
+  const {group, exitGroup, updateGroupUsers, navigation} = route.params;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newUserName, setNewUserName] = useState('');
@@ -25,7 +25,7 @@ export const GroupViewScreen = () => {
 
   const addUser = async () => {
     if (newUserName.trim()) {
-      const newUser = { id: users.length + 1, nombre: newUserName };
+      const newUser = {id: users.length + 1, nombre: newUserName};
       const updatedUsers = [...users, newUser];
       setUsers(updatedUsers);
       setNewUserName('');
@@ -36,7 +36,7 @@ export const GroupViewScreen = () => {
     }
   };
 
-  const renderUserItem = ({ item }: any) => (
+  const renderUserItem = ({item}: any) => (
     <View style={stylesViewGroup.userItem}>
       <Text style={stylesViewGroup.userItemBullet}>•</Text>
       <Text style={stylesViewGroup.userItemText}>{item.nombre}</Text>
@@ -46,7 +46,7 @@ export const GroupViewScreen = () => {
   return (
     <View style={stylesViewGroup.container}>
       <View style={stylesViewGroup.header}>
-        <Text variant="displayLarge" style={stylesViewGroup.title}>
+        <Text variant="displayMedium" style={stylesViewGroup.title}>
           {group.nombre}
         </Text>
         <Pressable
@@ -66,10 +66,13 @@ export const GroupViewScreen = () => {
           size={40}
           onPress={() => {
             exitGroup(group.id);
-            navigation.navigate('ListGroups');
+            navigation.navigate('BottomTabsHomeNavigator');
           }}
         />
       </View>
+      <Text variant="titleLarge" style={stylesViewGroup.code}>
+        Código de grupo: {group.codigo}
+      </Text>
       <View style={stylesViewGroup.usersList}>
         <View style={stylesViewGroup.userDropdown}>
           <Icon
@@ -77,12 +80,14 @@ export const GroupViewScreen = () => {
             size={40}
             color={globalColors.primary}
           />
-          <Text variant="titleLarge" style={{ color: globalColors.dark }}>
+          <Text variant="titleLarge" style={{color: globalColors.dark}}>
             Usuarios
           </Text>
           <Pressable onPress={() => handlenotShowUsers()}>
             <Icon
-              name={notShowUsers ? 'chevron-down-outline' : 'chevron-up-outline'}
+              name={
+                notShowUsers ? 'chevron-down-outline' : 'chevron-up-outline'
+              }
               size={25}
               color={globalColors.dark}
             />
@@ -100,7 +105,7 @@ export const GroupViewScreen = () => {
       </View>
       <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
         <View style={stylesViewGroup.modalContainer}>
-          <Text variant="titleLarge" style={{ color: globalColors.primary }}>
+          <Text variant="titleLarge" style={{color: globalColors.primary}}>
             ¿A quién deseas agregar?
           </Text>
           <TextInput
@@ -112,7 +117,7 @@ export const GroupViewScreen = () => {
           <Pressable onPress={addUser} style={stylesViewGroup.addPressable}>
             <Text
               variant="titleMedium"
-              style={{ color: globalColors.background }}>
+              style={{color: globalColors.background}}>
               Agregar usuario
             </Text>
           </Pressable>

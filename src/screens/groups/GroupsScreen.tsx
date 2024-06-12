@@ -1,20 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { Pressable, StyleSheet, View, FlatList } from 'react-native';
-import { Button, Modal, Portal, Text, TextInput } from 'react-native-paper';
-import { globalColors } from '../../themes/theme';
+import React, {useState, useEffect} from 'react';
+import {Pressable, StyleSheet, View, FlatList} from 'react-native';
+import {Button, Modal, Portal, Text, TextInput} from 'react-native-paper';
+import {globalColors} from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Group } from '../../utils/Group';
+import {Group} from '../../utils/Group';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GroupCard from '../../components/groups/GroupCard';
-import { stylesListGroups } from './style';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../App';
+import {stylesListGroups} from './style';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../../App';
 
 export type GroupsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'ListGroups'
 >;
+
+const generateUniqueCode = () => {
+  return Math.random().toString(36).substr(2, 8).toUpperCase();
+};
+
+const generateFakeGroups = () => {
+  const dummyGroup: Group = {
+    id: Date.now(),
+    nombre: 'Ejemplo',
+    color: 'blue',
+    limite_gasto: 1000,
+    monto_gastado: 500,
+    usuarios: [{id: 1, nombre: 'Usuario Ejemplo'}, {id: 2, nombre: 'test'}],
+    codigo: '12345678',
+  };
+
+  return dummyGroup;
+};
 
 export const GroupsScreen = () => {
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
@@ -26,6 +44,7 @@ export const GroupsScreen = () => {
     limite_gasto: 0,
     monto_gastado: 0,
     usuarios: [],
+    codigo: generateUniqueCode(),
   });
   const navigation = useNavigation<GroupsScreenNavigationProp>();
 
@@ -33,15 +52,27 @@ export const GroupsScreen = () => {
   const hideModalFinished = () => setVisibleModalFinished(false);
 
   const [visibleModalDelete, setVisibleModalDelete] = useState(false);
+  const [visibleModalJoin, setVisibleModalJoin] = useState(false);
+  const [joinGroupCode, setJoinGroupCode] = useState('');
   const [IdDelete, setIdDelete] = useState(0);
+  const [dummyGroups, setDummyGroups] = useState<Group[]>([]);
   const showModalDelete = () => setVisibleModalDelete(true);
   const hideModalDelete = () => setVisibleModalDelete(false);
+
+  const showModalJoin = () => setVisibleModalJoin(true);
+  const hideModalJoin = () => setVisibleModalJoin(false);
 
   const fetchGroups = async () => {
     try {
       const storedGroups = await AsyncStorage.getItem('groups');
       if (storedGroups) {
         setGroups(JSON.parse(storedGroups));
+      }
+
+      const dummyGroup = generateFakeGroups();
+      const exists = dummyGroups.some(g => g.id === dummyGroup.id);
+      if (!exists) {
+        setDummyGroups([dummyGroup]);
       }
     } catch (error) {
       console.error('Error fetching groups:', error);
@@ -50,7 +81,8 @@ export const GroupsScreen = () => {
 
   const saveGroup = async () => {
     try {
-      const newGroups = [...groups, group];
+      const newGroup = {...group, codigo: generateUniqueCode()};
+      const newGroups = [...groups, newGroup];
       await AsyncStorage.setItem('groups', JSON.stringify(newGroups));
       setGroups(newGroups);
       setGroup({
@@ -60,6 +92,7 @@ export const GroupsScreen = () => {
         limite_gasto: 0,
         monto_gastado: 0,
         usuarios: [],
+        codigo: generateUniqueCode(),
       });
       hideModalFinished();
     } catch (error) {
@@ -77,11 +110,30 @@ export const GroupsScreen = () => {
     }
   };
 
+  const joinGroup = async () => {
+    try {
+      const dummyGroupIndex = dummyGroups.findIndex(g => g.codigo === joinGroupCode.toUpperCase());
+      if (dummyGroupIndex !== -1) {
+        // Agregar el grupo dummy a la lista de grupos
+        const joinedGroup = dummyGroups[dummyGroupIndex];
+        const updatedGroups = [...groups, joinedGroup];
+        await AsyncStorage.setItem('groups', JSON.stringify(updatedGroups));
+        setGroups(updatedGroups);
+        setJoinGroupCode('');
+        hideModalJoin();
+      } else {
+        console.error('Código de grupo incorrecto');
+      }
+    } catch (error) {
+      console.error('Error joining group:', error);
+    }
+  };
+
   const updateGroupUsers = async (groupId: number, users: User[]) => {
     try {
       const updatedGroups = groups.map(g => {
         if (g.id === groupId) {
-          return { ...g, usuarios: users };
+          return {...g, usuarios: users};
         }
         return g;
       });
@@ -96,14 +148,19 @@ export const GroupsScreen = () => {
     fetchGroups();
   }, []);
 
-  const renderGroupItem = ({ item }: { item: Group }) => (
+  const renderGroupItem = ({item}: {item: Group}) => (
     <GroupCard
       id={item.id}
       name={item.nombre}
       color={item.color}
       seeTheGroup={(id: number) => {
         setIdDelete(id);
-        navigation.navigate('GroupView', { group: item, exitGroup, updateGroupUsers, navigation });
+        navigation.navigate('GroupView', {
+          group: item,
+          exitGroup,
+          updateGroupUsers,
+          navigation,
+        });
       }}
     />
   );
@@ -129,9 +186,7 @@ export const GroupsScreen = () => {
               color={globalColors.background}
             />
           </Pressable>
-          <Pressable
-            style={stylesListGroups.joinGroup}
-            onPress={showModalFinished}>
+          <Pressable style={stylesListGroups.joinGroup} onPress={showModalJoin}>
             <Text variant="titleMedium" style={stylesListGroups.titleButton}>
               Unirse a grupo
             </Text>
@@ -169,7 +224,7 @@ export const GroupsScreen = () => {
             <TextInput
               placeholder="Nombre"
               value={group.nombre}
-              onChangeText={text => setGroup({ ...group, nombre: text })}
+              onChangeText={text => setGroup({...group, nombre: text})}
               style={stylesListGroups.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -181,12 +236,12 @@ export const GroupsScreen = () => {
               {['red', 'blue', 'purple', 'green', 'yellow'].map(color => (
                 <Pressable
                   key={color}
-                  onPress={() => setGroup({ ...group, color: color })}
+                  onPress={() => setGroup({...group, color: color})}
                   style={[
                     stylesListGroups.colorCircle,
-                    { backgroundColor: color },
+                    {backgroundColor: color},
                     group.color === color &&
-                    stylesListGroups.selectedColorCircle,
+                      stylesListGroups.selectedColorCircle,
                   ]}
                 />
               ))}
@@ -235,6 +290,45 @@ export const GroupsScreen = () => {
                 </Text>
               </Button>
               <Button onPress={hideModalDelete}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
+                  Cancelar
+                </Text>
+              </Button>
+            </View>
+          </View>
+        </Modal>
+      </Portal>
+      <Portal>
+        <Modal
+          visible={visibleModalJoin}
+          onDismiss={hideModalJoin}
+          contentContainerStyle={stylesListGroups.containerStyle}>
+          <View style={stylesListGroups.modalContainer}>
+            <Text variant="titleLarge" style={stylesListGroups.nameTitleModal}>
+              Unirse a Grupo
+            </Text>
+            <Text variant="titleMedium" style={stylesListGroups.nameBodyModal}>
+              Ingresa el código del grupo
+            </Text>
+            <TextInput
+              placeholder="Código"
+              value={joinGroupCode}
+              onChangeText={text => setJoinGroupCode(text.toUpperCase())}
+              style={stylesListGroups.inputButtons}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+            />
+            <View style={stylesListGroups.buttomModalButtons}>
+              <Button onPress={joinGroup}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
+                  Unirse
+                </Text>
+              </Button>
+              <Button onPress={hideModalJoin}>
                 <Text
                   variant="titleMedium"
                   style={stylesListGroups.nameTitleModal}>

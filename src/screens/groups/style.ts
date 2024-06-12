@@ -9,15 +9,17 @@ export const stylesViewGroup = StyleSheet.create({
   },
   title: {
     color: globalColors.primary,
-    paddingBottom: 50,
-    paddingTop: 50,
     alignSelf: 'flex-start',
+  },
+  code: {
+    color: globalColors.primary,
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 20,
+    padding: 20,
     alignItems: 'center',
   },
   userList: {

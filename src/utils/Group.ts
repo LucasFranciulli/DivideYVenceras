@@ -6,5 +6,6 @@ export interface Group {
   color: string;
   limite_gasto: number;
   monto_gastado: number;
-  usuarios: User[]
+  usuarios: User[];
+  codigo: string;
 }
