@@ -1,15 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import {Pressable, StyleSheet, View, FlatList} from 'react-native';
-import {Button, Modal, Portal, Text, TextInput} from 'react-native-paper';
-import {globalColors} from '../../themes/theme';
+import React, { useState, useEffect } from 'react';
+import { Pressable, StyleSheet, View, FlatList } from 'react-native';
+import { Button, Modal, Portal, Text, TextInput } from 'react-native-paper';
+import { globalColors } from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {Group} from '../../utils/Group';
+import { Group } from '../../utils/Group';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GroupCard from '../../components/groups/GroupCard';
-import {stylesListGroups} from './style';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../App';
+import { stylesListGroups } from './style';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../App';
 
 export type GroupsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -69,7 +69,6 @@ export const GroupsScreen = () => {
 
   const exitGroup = async (id: number) => {
     try {
-      console.log(id);
       const filteredGroups = groups.filter(g => g.id !== id);
       await AsyncStorage.setItem('groups', JSON.stringify(filteredGroups));
       setGroups(filteredGroups);
@@ -78,18 +77,33 @@ export const GroupsScreen = () => {
     }
   };
 
+  const updateGroupUsers = async (groupId: number, users: User[]) => {
+    try {
+      const updatedGroups = groups.map(g => {
+        if (g.id === groupId) {
+          return { ...g, usuarios: users };
+        }
+        return g;
+      });
+      await AsyncStorage.setItem('groups', JSON.stringify(updatedGroups));
+      setGroups(updatedGroups);
+    } catch (error) {
+      console.error('Error updating group users:', error);
+    }
+  };
+
   useEffect(() => {
     fetchGroups();
   }, []);
 
-  const renderGroupItem = ({item}: {item: Group}) => (
+  const renderGroupItem = ({ item }: { item: Group }) => (
     <GroupCard
       id={item.id}
       name={item.nombre}
       color={item.color}
       seeTheGroup={(id: number) => {
         setIdDelete(id);
-        navigation.navigate('GroupView', {group: item, exitGroup, navigation});
+        navigation.navigate('GroupView', { group: item, exitGroup, updateGroupUsers, navigation });
       }}
     />
   );
@@ -155,7 +169,7 @@ export const GroupsScreen = () => {
             <TextInput
               placeholder="Nombre"
               value={group.nombre}
-              onChangeText={text => setGroup({...group, nombre: text})}
+              onChangeText={text => setGroup({ ...group, nombre: text })}
               style={stylesListGroups.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -167,12 +181,12 @@ export const GroupsScreen = () => {
               {['red', 'blue', 'purple', 'green', 'yellow'].map(color => (
                 <Pressable
                   key={color}
-                  onPress={() => setGroup({...group, color: color})}
+                  onPress={() => setGroup({ ...group, color: color })}
                   style={[
                     stylesListGroups.colorCircle,
-                    {backgroundColor: color},
+                    { backgroundColor: color },
                     group.color === color &&
-                      stylesListGroups.selectedColorCircle,
+                    stylesListGroups.selectedColorCircle,
                   ]}
                 />
               ))}
