@@ -33,7 +33,7 @@ export const HomeBottomTabs = ({
       case 'Add':
         return <Icon name={'add-circle-outline'} size={50} />;
       case 'Profile':
-        return <Icon name={'person-circle-outline'} size={50} />;
+        return <Icon name={'cash-outline'} size={50} />;
       case 'Groups':
         return <Icon name={'people-outline'} size={50} />;
       case 'Activity':
