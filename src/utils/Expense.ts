@@ -8,4 +8,5 @@ export interface Expense {
   isFixed: boolean;
   tag?: string;
   date: Date;
+  group?: String;
 }

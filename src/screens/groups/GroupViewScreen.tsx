@@ -1,12 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Pressable, TextInput, View} from 'react-native';
 import {stylesViewGroup} from './style';
-import {Text, Modal, Button} from 'react-native-paper';
+import {Text, Modal, Button, Divider} from 'react-native-paper';
 import {RootStackParamList} from '../../../App';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {User} from '../../utils/Users';
 import {globalColors} from '../../themes/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Expense} from '../../utils/Expense';
+import { ExpenseCard } from '../../components/expense/ExpenseCard';
+import { showToastError, showToastSuccess } from '../../utils/ToastActions';
 
 type GroupViewScreenRouteProp = RouteProp<RootStackParamList, 'GroupView'>;
 
@@ -22,6 +26,32 @@ export const GroupViewScreen = () => {
   const handlenotShowUsers = () => {
     setNotShowUsers(!notShowUsers);
   };
+
+  const [groupExpenses, setGroupExpenses] = useState<Expense[]>([]);
+
+  useEffect(() => {
+    const loadGroupExpenses = async () => {
+      try {
+        const storedGroupExpenses = await AsyncStorage.getItem('groupExpenses');
+        if (storedGroupExpenses) {
+          const parsedExpenses = JSON.parse(storedGroupExpenses);
+          if (parsedExpenses && typeof parsedExpenses === 'object') {
+            const currentGroupExpenses = parsedExpenses[group.id] || [];
+            setGroupExpenses(currentGroupExpenses);
+          } else {
+            console.error(
+              'Stored expenses data is not a valid object:',
+              parsedExpenses,
+            );
+          }
+        }
+      } catch (error) {
+        console.error('Error loading group expenses:', error);
+      }
+    };
+
+    loadGroupExpenses();
+  }, [group.id]);
 
   const addUser = async () => {
     if (newUserName.trim()) {
@@ -41,6 +71,34 @@ export const GroupViewScreen = () => {
       <Text style={stylesViewGroup.userItemBullet}>•</Text>
       <Text style={stylesViewGroup.userItemText}>{item.nombre}</Text>
     </View>
+  );
+
+  const deleteExpense = async (id: number) => {
+    try {
+      const filteredExpenses = groupExpenses.filter(expense => expense.id !== id);
+      await AsyncStorage.setItem('groupExpenses', JSON.stringify(filteredExpenses));
+      setGroupExpenses(filteredExpenses);
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+    }
+  };
+
+  const msjError = (message: string) => {
+    showToastError('Error', message);
+  };
+
+  const msjSuccess = (message: string) => {
+    showToastSuccess(message, '');
+  };
+
+  const renderExpenseItem = ({item}: {item: Expense}) => (
+    <ExpenseCard
+      item={item}
+      deleteExpense={deleteExpense}
+      showToastSuccess={msjSuccess}
+      showToastError={msjError}
+      navigation={navigation}
+    />
   );
 
   return (
@@ -103,6 +161,19 @@ export const GroupViewScreen = () => {
           />
         )}
       </View>
+      <Divider />
+        {groupExpenses.length > 0 ? (
+          <FlatList
+            data={groupExpenses}
+            renderItem={renderExpenseItem}
+            style={stylesViewGroup.groupExpensesContainer}
+            keyExtractor={item => item.id.toString()}
+          />
+        ) : (
+          <Text style={stylesViewGroup.noGroupText}>
+            No hay gastos en este grupo
+          </Text>
+        )}
       <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
         <View style={stylesViewGroup.modalContainer}>
           <Text variant="titleLarge" style={{color: globalColors.primary}}>
@@ -126,3 +197,5 @@ export const GroupViewScreen = () => {
     </View>
   );
 };
+
+export default GroupViewScreen;

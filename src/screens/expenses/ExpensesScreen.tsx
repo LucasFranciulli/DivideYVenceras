@@ -54,12 +54,46 @@ export const ExpensesScreen = () => {
   });
   const [checked, setChecked] = useState(false);
 
+  //TODO ESTO SACARLO
+  const [groupList, setGroupList] = useState([]);
+  const [currentGroup, setCurrentGroup] = useState('');
+  const [showDropDownGroups, setShowDropDownGroups] = useState(false);
+  useEffect(() => {
+    const loadGroups = async () => {
+      try {
+        const storedGroups = await AsyncStorage.getItem('groups');
+        if (storedGroups) {
+          const groups = JSON.parse(storedGroups);
+          const groupItems = groups.map((group: any) => ({
+            label: group.nombre, // Ajusta según la estructura de tu grupo
+            value: group.id, // Ajusta según la estructura de tu grupo
+          }));
+          setGroupList(groupItems);
+        }
+      } catch (error) {
+        console.error('Error loading groups:', error);
+      }
+    };
+
+    loadGroups();
+  }, []);
+
   const addExpense = async () => {
     try {
-      const storedExpenses = await AsyncStorage.getItem('expenses');
-      const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
-      expenses.push(expense);
-      await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
+      if (currentGroup) {
+        const storedGroupExpenses = await AsyncStorage.getItem('groupExpenses');
+        const groupExpenses = storedGroupExpenses ? JSON.parse(storedGroupExpenses) : {};
+        if (!groupExpenses[currentGroup]) {
+          groupExpenses[currentGroup] = [];
+        }
+        groupExpenses[currentGroup].push(expense);
+        await AsyncStorage.setItem('groupExpenses', JSON.stringify(groupExpenses));
+      } else {
+        const storedExpenses = await AsyncStorage.getItem('expenses');
+        const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
+        expenses.push(expense);
+        await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
+      }
 
       setExpense({
         id: Date.now() * Math.floor(Math.random() * 100) + 10,
@@ -69,7 +103,9 @@ export const ExpensesScreen = () => {
         expirationDate: undefined,
         category: '',
         isFixed: checked,
+        tag: '',
         date: new Date(),
+        group: '',
       });
       showToastSuccess('Gasto añadido!', '');
     } catch (error) {
@@ -160,6 +196,11 @@ export const ExpensesScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
+  useEffect(() => {
+    setExpense({ ...expense, group: currentGroup });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentGroup]);
+
   return (
     <View style={styleListExpenses.container}>
       <Text variant="displayLarge" style={styleListExpenses.title}>
@@ -201,7 +242,7 @@ export const ExpensesScreen = () => {
               placeholder="Monto"
               value={expense.amount.toString()}
               onChangeText={text =>
-                setExpense({ ...expense, amount: parseFloat(text) })
+                setExpense({ ...expense, amount: Number(text) })
               }
               keyboardType="numeric"
               style={styleListExpenses.inputButtons}
@@ -308,6 +349,21 @@ export const ExpensesScreen = () => {
             </View>
           </View>
         </View>
+        <View style={styleListExpenses.inputContainer}>
+            <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
+              Grupo
+            </Text>
+            <DropDown
+              label={'Seleccionar grupo'}
+              mode={'outlined'}
+              visible={showDropDownGroups}
+              showDropDown={() => setShowDropDownGroups(true)}
+              onDismiss={() => setShowDropDownGroups(false)}
+              value={currentGroup}
+              setValue={setCurrentGroup}
+              list={groupList}
+            />
+          </View>
         <View style={styleListExpenses.buttonContainer}>
           <View
             style={[

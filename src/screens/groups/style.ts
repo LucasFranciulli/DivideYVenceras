@@ -92,6 +92,7 @@ export const stylesViewGroup = StyleSheet.create({
     backgroundColor: globalColors.backgroundHighlited,
     borderRadius: 20,
     alignSelf: 'center',
+    marginBottom: 20,
   },
   userDropdown: {
     flexDirection: 'row',
@@ -105,6 +106,22 @@ export const stylesViewGroup = StyleSheet.create({
     backgroundColor: globalColors.secondary,
     padding: 10,
     borderRadius: 10,
+  },
+  noGroupText: {
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  expenseItem: {
+    padding: 10,
+    backgroundColor: globalColors.backgroundHighlited,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  expenseText: {
+    marginBottom: 5,
+  },
+  groupExpensesContainer: {
+    padding: 20,
   },
 });
 
