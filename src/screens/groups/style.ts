@@ -1,24 +1,25 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
 import {globalColors} from '../../themes/theme';
 
+var {height, width} = Dimensions.get('window');
 export const stylesViewGroup = StyleSheet.create({
   container: {
     height: '100%',
     width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   title: {
     color: globalColors.primary,
-    paddingBottom: 50,
-    paddingTop: 50,
     alignSelf: 'flex-start',
+  },
+  code: {
+    color: globalColors.primary,
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
-    paddingHorizontal: 20,
+    width: '100%',
+    padding: 20,
     alignItems: 'center',
   },
   userList: {
@@ -29,6 +30,8 @@ export const stylesViewGroup = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 15,
+  },
+  separetor: {
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
@@ -41,10 +44,15 @@ export const stylesViewGroup = StyleSheet.create({
     fontSize: 22,
   },
   modalContainer: {
-    flex: 1,
+    width: width * 0.9,
+    height: height * 0.25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignSelf: 'center',
+    padding: 10,
+    borderRadius: 30,
+    gap: 20,
+    backgroundColor: globalColors.background,
   },
   modalContent: {
     width: '80%',
@@ -64,6 +72,56 @@ export const stylesViewGroup = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 20,
+  },
+  addUsers: {
+    borderRadius: 30,
+    width: 120,
+    height: 50,
+    backgroundColor: globalColors.secondary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+  },
+  addButton: {
+    color: globalColors.background,
+  },
+  usersList: {
+    alignItems: 'center',
+    width: '95%',
+    backgroundColor: globalColors.backgroundHighlited,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  userDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+  },
+  addPressable: {
+    backgroundColor: globalColors.secondary,
+    padding: 10,
+    borderRadius: 10,
+  },
+  noGroupText: {
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  expenseItem: {
+    padding: 10,
+    backgroundColor: globalColors.backgroundHighlited,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  expenseText: {
+    marginBottom: 5,
+  },
+  groupExpensesContainer: {
+    padding: 20,
   },
 });
 

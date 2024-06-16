@@ -16,6 +16,24 @@ export type GroupsScreenNavigationProp = NativeStackNavigationProp<
   'ListGroups'
 >;
 
+const generateUniqueCode = () => {
+  return Math.random().toString(36).substr(2, 8).toUpperCase();
+};
+
+const generateFakeGroups = () => {
+  const dummyGroup: Group = {
+    id: Date.now(),
+    nombre: 'Ejemplo',
+    color: 'blue',
+    limite_gasto: 1000,
+    monto_gastado: 500,
+    usuarios: [{id: 1, nombre: 'Usuario Ejemplo'}, {id: 2, nombre: 'test'}],
+    codigo: '12345678',
+  };
+
+  return dummyGroup;
+};
+
 export const GroupsScreen = () => {
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -26,6 +44,7 @@ export const GroupsScreen = () => {
     limite_gasto: 0,
     monto_gastado: 0,
     usuarios: [],
+    codigo: generateUniqueCode(),
   });
   const navigation = useNavigation<GroupsScreenNavigationProp>();
 
@@ -33,15 +52,27 @@ export const GroupsScreen = () => {
   const hideModalFinished = () => setVisibleModalFinished(false);
 
   const [visibleModalDelete, setVisibleModalDelete] = useState(false);
+  const [visibleModalJoin, setVisibleModalJoin] = useState(false);
+  const [joinGroupCode, setJoinGroupCode] = useState('');
   const [IdDelete, setIdDelete] = useState(0);
+  const [dummyGroups, setDummyGroups] = useState<Group[]>([]);
   const showModalDelete = () => setVisibleModalDelete(true);
   const hideModalDelete = () => setVisibleModalDelete(false);
+
+  const showModalJoin = () => setVisibleModalJoin(true);
+  const hideModalJoin = () => setVisibleModalJoin(false);
 
   const fetchGroups = async () => {
     try {
       const storedGroups = await AsyncStorage.getItem('groups');
       if (storedGroups) {
         setGroups(JSON.parse(storedGroups));
+      }
+
+      const dummyGroup = generateFakeGroups();
+      const exists = dummyGroups.some(g => g.id === dummyGroup.id);
+      if (!exists) {
+        setDummyGroups([dummyGroup]);
       }
     } catch (error) {
       console.error('Error fetching groups:', error);
@@ -50,7 +81,8 @@ export const GroupsScreen = () => {
 
   const saveGroup = async () => {
     try {
-      const newGroups = [...groups, group];
+      const newGroup = {...group, codigo: generateUniqueCode()};
+      const newGroups = [...groups, newGroup];
       await AsyncStorage.setItem('groups', JSON.stringify(newGroups));
       setGroups(newGroups);
       setGroup({
@@ -60,6 +92,7 @@ export const GroupsScreen = () => {
         limite_gasto: 0,
         monto_gastado: 0,
         usuarios: [],
+        codigo: generateUniqueCode(),
       });
       hideModalFinished();
     } catch (error) {
@@ -69,12 +102,45 @@ export const GroupsScreen = () => {
 
   const exitGroup = async (id: number) => {
     try {
-      console.log(id);
       const filteredGroups = groups.filter(g => g.id !== id);
       await AsyncStorage.setItem('groups', JSON.stringify(filteredGroups));
       setGroups(filteredGroups);
     } catch (error) {
       console.error('Error deleting group:', error);
+    }
+  };
+
+  const joinGroup = async () => {
+    try {
+      const dummyGroupIndex = dummyGroups.findIndex(g => g.codigo === joinGroupCode.toUpperCase());
+      if (dummyGroupIndex !== -1) {
+        // Agregar el grupo dummy a la lista de grupos
+        const joinedGroup = dummyGroups[dummyGroupIndex];
+        const updatedGroups = [...groups, joinedGroup];
+        await AsyncStorage.setItem('groups', JSON.stringify(updatedGroups));
+        setGroups(updatedGroups);
+        setJoinGroupCode('');
+        hideModalJoin();
+      } else {
+        console.error('Código de grupo incorrecto');
+      }
+    } catch (error) {
+      console.error('Error joining group:', error);
+    }
+  };
+
+  const updateGroupUsers = async (groupId: number, users: User[]) => {
+    try {
+      const updatedGroups = groups.map(g => {
+        if (g.id === groupId) {
+          return {...g, usuarios: users};
+        }
+        return g;
+      });
+      await AsyncStorage.setItem('groups', JSON.stringify(updatedGroups));
+      setGroups(updatedGroups);
+    } catch (error) {
+      console.error('Error updating group users:', error);
     }
   };
 
@@ -89,7 +155,12 @@ export const GroupsScreen = () => {
       color={item.color}
       seeTheGroup={(id: number) => {
         setIdDelete(id);
-        navigation.navigate('GroupView', {group: item, exitGroup, navigation});
+        navigation.navigate('GroupView', {
+          group: item,
+          exitGroup,
+          updateGroupUsers,
+          navigation,
+        });
       }}
     />
   );
@@ -115,9 +186,7 @@ export const GroupsScreen = () => {
               color={globalColors.background}
             />
           </Pressable>
-          <Pressable
-            style={stylesListGroups.joinGroup}
-            onPress={showModalFinished}>
+          <Pressable style={stylesListGroups.joinGroup} onPress={showModalJoin}>
             <Text variant="titleMedium" style={stylesListGroups.titleButton}>
               Unirse a grupo
             </Text>
@@ -221,6 +290,45 @@ export const GroupsScreen = () => {
                 </Text>
               </Button>
               <Button onPress={hideModalDelete}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
+                  Cancelar
+                </Text>
+              </Button>
+            </View>
+          </View>
+        </Modal>
+      </Portal>
+      <Portal>
+        <Modal
+          visible={visibleModalJoin}
+          onDismiss={hideModalJoin}
+          contentContainerStyle={stylesListGroups.containerStyle}>
+          <View style={stylesListGroups.modalContainer}>
+            <Text variant="titleLarge" style={stylesListGroups.nameTitleModal}>
+              Unirse a Grupo
+            </Text>
+            <Text variant="titleMedium" style={stylesListGroups.nameBodyModal}>
+              Ingresa el código del grupo
+            </Text>
+            <TextInput
+              placeholder="Código"
+              value={joinGroupCode}
+              onChangeText={text => setJoinGroupCode(text.toUpperCase())}
+              style={stylesListGroups.inputButtons}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+            />
+            <View style={stylesListGroups.buttomModalButtons}>
+              <Button onPress={joinGroup}>
+                <Text
+                  variant="titleMedium"
+                  style={stylesListGroups.nameTitleModal}>
+                  Unirse
+                </Text>
+              </Button>
+              <Button onPress={hideModalJoin}>
                 <Text
                   variant="titleMedium"
                   style={stylesListGroups.nameTitleModal}>

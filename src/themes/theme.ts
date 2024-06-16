@@ -5,6 +5,7 @@ export const globalColors = {
   tag: '#cbf1c7',
   category: '#afcfac',
   background: '#f6f6f6',
+  backgroundHighlited: '#dcf0da',
   dark: '#081324',
   grey: '#50555c',
 };

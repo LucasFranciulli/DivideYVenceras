@@ -29,11 +29,11 @@ export const HomeBottomTabs = ({
   const renderIcon = (name: string) => {
     switch (name) {
       case 'Notifications':
-        return <Icon name={'notifications-outline'} size={50} />;
+        return <Icon name={'person-circle-outline'} size={50} />;
       case 'Add':
         return <Icon name={'add-circle-outline'} size={50} />;
       case 'Profile':
-        return <Icon name={'person-circle-outline'} size={50} />;
+        return <Icon name={'cash-outline'} size={50} />;
       case 'Groups':
         return <Icon name={'people-outline'} size={50} />;
       case 'Activity':

@@ -82,11 +82,6 @@ export const ProfileScreen = () => {
         <Text variant="displayLarge" style={styles.title}>
           Gastos
         </Text>
-        <Icon
-          name={'log-out-outline'}
-          size={40}
-          onPress={() => navigation.navigate('LoginScreen')}
-        />
       </View>
       {expenses.length === 0 ? (
         <Text style={styles.noDataText}>No hay gastos.</Text>
