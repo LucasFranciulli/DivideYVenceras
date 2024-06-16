@@ -27,8 +27,13 @@ export const ProfileScreen = () => {
       const fetchExpenses = async () => {
         try {
           const storedExpenses = await AsyncStorage.getItem('expenses');
+          const token = await AsyncStorage.getItem('token');
           if (storedExpenses) {
             setExpenses(JSON.parse(storedExpenses));
+          }
+          if (token) {
+            const t = JSON.parse(token)
+            console.log(t);
           }
         } catch (error) {
           console.error('Error fetching expenses:', error);
