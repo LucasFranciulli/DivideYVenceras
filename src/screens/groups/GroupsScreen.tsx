@@ -10,6 +10,7 @@ import {stylesListGroups} from './style';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../App';
+import { User } from '../../utils/User';
 
 export type GroupsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -27,8 +28,8 @@ const generateFakeGroups = () => {
     color: 'blue',
     limite_gasto: 1000,
     monto_gastado: 500,
-    usuarios: [{id: 1, nombre: 'Usuario Ejemplo'}, {id: 2, nombre: 'test'}],
-    codigo: '12345678',
+    token: '12345678',
+    descripcion: ''
   };
 
   return dummyGroup;
@@ -43,8 +44,8 @@ export const GroupsScreen = () => {
     color: '',
     limite_gasto: 0,
     monto_gastado: 0,
-    usuarios: [],
-    codigo: generateUniqueCode(),
+    token: generateUniqueCode(),
+    descripcion: ''
   });
   const navigation = useNavigation<GroupsScreenNavigationProp>();
 
