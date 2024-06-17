@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showToastError, showToastSuccess } from '../../utils/ToastActions';
 import styles from './style';
+import * as service from './services/login';
 
 export const LoginScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
@@ -39,30 +40,21 @@ export const LoginScreen = ({ navigation }: any) => {
   };
 
   const onLogin = async (inputUsername: string, inputPassword: string, skipSave = false) => {
-    const usernameToCheck = inputUsername || username;
-    const passwordToCheck = inputPassword || password;
-
-    if (usernameToCheck === 'test' && passwordToCheck === '1234') {
-      showToastSuccess('Éxito', 'Inicio de sesión exitoso');
-      if (rememberPassword && !skipSave) {
-        try {
-          await AsyncStorage.setItem('username', usernameToCheck);
-          await AsyncStorage.setItem('password', passwordToCheck);
-          await AsyncStorage.setItem('rememberPassword', rememberPassword.toString());
-        } catch (e) {
-          console.error('Failed to save credentials', e);
+    try {
+      const response = await service.login(inputUsername, inputPassword);
+      if (response.ok) {
+        showToastSuccess('Se logeo con exito!', '');
+        if (rememberPassword && !skipSave) {
+          await AsyncStorage.setItem('username', inputUsername);
+          await AsyncStorage.setItem('password', inputPassword);
+          await AsyncStorage.setItem('token', response.token);
         }
+        navigation.navigate('BottomTabsHomeNavigator', navigation);
       } else {
-        // Limpiar credenciales recordadas si el usuario no marcó "Recordar"
-        if (!rememberPassword) {
-          await AsyncStorage.removeItem('username');
-          await AsyncStorage.removeItem('password');
-          await AsyncStorage.removeItem('rememberPassword');
-        }
+        showToastError('Error', response.message);
       }
-      navigation.navigate('BottomTabsHomeNavigator');
-    } else {
-      showToastError('Error', 'Usuario o contraseña incorrectos');
+    } catch (error: any) {
+      showToastError('Error', error.message);
     }
   };
 
