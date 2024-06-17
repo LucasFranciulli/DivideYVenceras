@@ -19,6 +19,7 @@ export const ActivityScreen = () => {
     try {
       const storedExpenses = await AsyncStorage.getItem('expenses');
       if (storedExpenses) {
+        console.log("storedExpenses", storedExpenses)
         setExpenses(JSON.parse(storedExpenses));
       } else {
         setExpenses([]); // Si no hay gastos, establece un array vacío

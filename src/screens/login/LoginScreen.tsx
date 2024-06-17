@@ -4,8 +4,8 @@ import { Button, Checkbox, Text, TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showToastError, showToastSuccess } from '../../utils/ToastActions';
-import styles from './style';
 import * as service from './services/login';
+import styles from './style';
 
 export const LoginScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
@@ -24,7 +24,7 @@ export const LoginScreen = ({ navigation }: any) => {
             setUsername(storedUsername);
             setPassword(storedPassword);
             setRememberPassword(true);
-            onLogin(storedUsername, storedPassword, true);
+            onLogin(storedUsername, storedPassword);
           }
         }
       } catch (e) {
@@ -39,16 +39,16 @@ export const LoginScreen = ({ navigation }: any) => {
     setHidePassword(!hidePassword);
   };
 
-  const onLogin = async (inputUsername: string, inputPassword: string, skipSave = false) => {
+  const onLogin = async (inputUsername: string, inputPassword: string) => {
     try {
       const response = await service.login(inputUsername, inputPassword);
       if (response.ok) {
         showToastSuccess('Se logeo con exito!', '');
-        if (rememberPassword && !skipSave) {
+        if (rememberPassword) {
           await AsyncStorage.setItem('username', inputUsername);
           await AsyncStorage.setItem('password', inputPassword);
-          await AsyncStorage.setItem('token', response.token);
         }
+        await AsyncStorage.setItem('token', response.token);
         navigation.navigate('BottomTabsHomeNavigator', navigation);
       } else {
         showToastError('Error', response.message);

@@ -1,21 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView, Pressable, FlatList } from 'react-native';
-import { Button, Checkbox, Modal, Portal, Text, TextInput } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, View, ScrollView, Pressable, FlatList} from 'react-native';
+import {
+  Button,
+  Checkbox,
+  Modal,
+  Portal,
+  Text,
+  TextInput,
+} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { globalColors } from '../../themes/theme';
-import { Expense } from '../../utils/Expense';
-import Toast from 'react-native-toast-message';
+import {globalColors} from '../../themes/theme';
+import {Expense} from '../../utils/Expense';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DropDown from 'react-native-paper-dropdown';
-import { styleListExpenses } from './style';
-import { showToastError, showToastSuccess } from '../../utils/ToastActions';
+import {styleListExpenses} from './style';
+import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 import DatePicker from 'react-native-date-picker';
+import {getCategorias} from './services/categorias';
+import {Category} from '../../utils/Category';
 
 export const ExpensesScreen = () => {
   const [showDropDownCategories, setShowDropDownCategories] = useState(false);
   const [showDropDownTags, setShowDropDownTags] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState('');
-  const [currentTag, setCurrentTag] = useState('');
 
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
   const [visibleModalRemove, setVisibleModalRemove] = useState(false);
@@ -25,17 +31,13 @@ export const ExpensesScreen = () => {
   const showModalRemove = () => setVisibleModalRemove(true);
   const hideModalRemove = () => setVisibleModalRemove(false);
 
-  const [categoriesList, setCategoriesList] = useState([
-    { label: 'Comida', value: 'comida' },
-    { label: 'Ropa', value: 'ropa' },
-    { label: 'Higiene', value: 'higiene' },
-    { label: 'Tecnología', value: 'tecnologia' },
-    { label: 'Bebidas', value: 'bebidas' },
-    { label: 'Farmacia', value: 'farmacia' },
-    { label: 'Entretenimiento', value: 'entretenimiento' },
-    { label: 'Otro', value: 'otro' },
-  ]);
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [categotySelected, setCategotySelected] = useState<Category | null>(
+    null,
+  );
+  const [currentCategory, setCurrentCategory] = useState('');
+  const [currentTag, setCurrentTag] = useState('');
   const [newTag, setNewTag] = useState('');
   const [tagList, setTagList] = useState([]);
   const [date, setDate] = useState(new Date());
@@ -59,35 +61,49 @@ export const ExpensesScreen = () => {
   const [currentGroup, setCurrentGroup] = useState('');
   const [showDropDownGroups, setShowDropDownGroups] = useState(false);
   useEffect(() => {
-    const loadGroups = async () => {
-      try {
-        const storedGroups = await AsyncStorage.getItem('groups');
-        if (storedGroups) {
-          const groups = JSON.parse(storedGroups);
-          const groupItems = groups.map((group: any) => ({
-            label: group.nombre, // Ajusta según la estructura de tu grupo
-            value: group.id, // Ajusta según la estructura de tu grupo
-          }));
-          setGroupList(groupItems);
-        }
-      } catch (error) {
-        console.error('Error loading groups:', error);
+    // const loadGroups = async () => {
+    //   try {
+    //     const storedGroups = await AsyncStorage.getItem('groups');
+    //     if (storedGroups) {
+    //       const groups = JSON.parse(storedGroups);
+    //       const groupItems = groups.map((group: any) => ({
+    //         label: group.nombre, // Ajusta según la estructura de tu grupo
+    //         value: group.id, // Ajusta según la estructura de tu grupo
+    //       }));
+    //       setGroupList(groupItems);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error loading groups:', error);
+    //   }
+    // };
+
+    // loadGroups();
+
+    const loadCategories = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const categories = await getCategorias(token);
+        setCategoriesList(categories);
       }
     };
-
-    loadGroups();
+    loadCategories();
   }, []);
 
   const addExpense = async () => {
     try {
       if (currentGroup) {
         const storedGroupExpenses = await AsyncStorage.getItem('groupExpenses');
-        const groupExpenses = storedGroupExpenses ? JSON.parse(storedGroupExpenses) : {};
+        const groupExpenses = storedGroupExpenses
+          ? JSON.parse(storedGroupExpenses)
+          : {};
         if (!groupExpenses[currentGroup]) {
           groupExpenses[currentGroup] = [];
         }
         groupExpenses[currentGroup].push(expense);
-        await AsyncStorage.setItem('groupExpenses', JSON.stringify(groupExpenses));
+        await AsyncStorage.setItem(
+          'groupExpenses',
+          JSON.stringify(groupExpenses),
+        );
       } else {
         const storedExpenses = await AsyncStorage.getItem('expenses');
         const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
@@ -182,23 +198,27 @@ export const ExpensesScreen = () => {
   }, []);
 
   useEffect(() => {
-    setExpense({ ...expense, category: currentCategory });
+    setExpense({...expense, category: currentCategory});
+    const c = categoriesList.find(obj => obj.nombre === currentCategory);
+    if (c) {
+      setCategotySelected(c);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCategory]);
 
   useEffect(() => {
-    setExpense({ ...expense, tag: currentTag });
+    setExpense({...expense, tag: currentTag});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTag]);
 
   useEffect(() => {
-    setExpense({ ...expense, date: date });
+    setExpense({...expense, date: date});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   useEffect(() => {
-    setExpense({ ...expense, group: currentGroup });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setExpense({...expense, group: currentGroup});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentGroup]);
 
   return (
@@ -215,7 +235,7 @@ export const ExpensesScreen = () => {
             <TextInput
               placeholder="Nombre"
               value={expense.name}
-              onChangeText={text => setExpense({ ...expense, name: text })}
+              onChangeText={text => setExpense({...expense, name: text})}
               style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -228,7 +248,7 @@ export const ExpensesScreen = () => {
             <TextInput
               placeholder="Descripción"
               value={expense.description}
-              onChangeText={text => setExpense({ ...expense, description: text })}
+              onChangeText={text => setExpense({...expense, description: text})}
               style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -242,7 +262,7 @@ export const ExpensesScreen = () => {
               placeholder="Monto"
               value={expense.amount.toString()}
               onChangeText={text =>
-                setExpense({ ...expense, amount: Number(text) })
+                setExpense({...expense, amount: Number(text)})
               }
               keyboardType="numeric"
               style={styleListExpenses.inputButtons}
@@ -250,11 +270,13 @@ export const ExpensesScreen = () => {
               activeUnderlineColor="transparent"
             />
           </View>
-          <View style={[styleListExpenses.inputContainer, { marginBottom: 10 }]}>
+          <View style={[styleListExpenses.inputContainer, {marginBottom: 10}]}>
             <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Fecha
             </Text>
-            <Pressable onPress={() => setOpen(true)} style={styleListExpenses.datePickerButton}>
+            <Pressable
+              onPress={() => setOpen(true)}
+              style={styleListExpenses.datePickerButton}>
               <Text style={styleListExpenses.datePickerButtonText}>
                 {date.toDateString()}
               </Text>
@@ -264,7 +286,7 @@ export const ExpensesScreen = () => {
               modal
               open={open}
               date={date}
-              onConfirm={(date) => {
+              onConfirm={date => {
                 setOpen(false);
                 setDate(date);
               }}
@@ -274,7 +296,7 @@ export const ExpensesScreen = () => {
               mode="date"
             />
           </View>
-          <View style={[styleListExpenses.inputContainer, { marginBottom: 10 }]}>
+          <View style={[styleListExpenses.inputContainer, {marginBottom: 10}]}>
             <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Categoría
             </Text>
@@ -286,70 +308,24 @@ export const ExpensesScreen = () => {
               onDismiss={() => setShowDropDownCategories(false)}
               value={currentCategory}
               setValue={setCurrentCategory}
-              list={categoriesList}
+              list={categoriesList.map(c => ({
+                label: c.nombre.toUpperCase(),
+                value: c.id,
+              }))}
               dropDownStyle={styleListExpenses.dropDownStyle}
-              dropDownItemSelectedStyle={styleListExpenses.dropDownItemSelectedStyle}
+              dropDownItemSelectedStyle={
+                styleListExpenses.dropDownItemSelectedStyle
+              }
               dropDownItemStyle={styleListExpenses.dropDownItemStyle}
               dropDownItemTextStyle={styleListExpenses.dropDownItemTextStyle}
               activeColor={globalColors.background}
-              inputProps={[styleListExpenses.inputButtons, styleListExpenses.dropdown]}
+              inputProps={[
+                styleListExpenses.inputButtons,
+                styleListExpenses.dropdown,
+              ]}
             />
           </View>
           <View style={styleListExpenses.inputContainer}>
-            <View style={styleListExpenses.inputContainer}>
-              <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
-                Tags
-              </Text>
-              <DropDown
-                mode={'outlined'}
-                placeholder="Tags"
-                visible={showDropDownTags}
-                showDropDown={() => setShowDropDownTags(true)}
-                onDismiss={() => setShowDropDownTags(false)}
-                value={currentTag}
-                setValue={setCurrentTag}
-                list={tagList}
-                dropDownStyle={styleListExpenses.dropDownStyle}
-                dropDownItemSelectedStyle={styleListExpenses.dropDownItemSelectedStyle}
-                dropDownItemStyle={styleListExpenses.dropDownItemStyle}
-                dropDownItemTextStyle={styleListExpenses.dropDownItemTextStyle}
-                activeColor={globalColors.background}
-                inputProps={[styleListExpenses.inputButtons, styleListExpenses.dropdown]}
-              />
-            </View>
-            <View style={styleListExpenses.inputRowContainer}>
-              <Pressable
-                style={styleListExpenses.addCategoriesButton}
-                onPress={showModalFinished}>
-                <Text
-                  variant="titleMedium"
-                  style={styleListExpenses.addCategoriesButtonText}>
-                  Tag
-                </Text>
-                <Icon
-                  name={'add-outline'}
-                  size={25}
-                  color={globalColors.background}
-                />
-              </Pressable>
-              <Pressable
-                style={styleListExpenses.addCategoriesButton}
-                onPress={showModalRemove}>
-                <Text
-                  variant="titleMedium"
-                  style={styleListExpenses.addCategoriesButtonText}>
-                  Tag
-                </Text>
-                <Icon
-                  name={'remove-outline'}
-                  size={25}
-                  color={globalColors.background}
-                />
-              </Pressable>
-            </View>
-          </View>
-        </View>
-        <View style={styleListExpenses.inputContainer}>
             <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Grupo
             </Text>
@@ -364,6 +340,65 @@ export const ExpensesScreen = () => {
               list={groupList}
             />
           </View>
+        </View>
+        <View style={styleListExpenses.inputContainer}>
+          <View style={styleListExpenses.inputContainer}>
+            <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
+              Tags
+            </Text>
+            <DropDown
+              mode={'outlined'}
+              placeholder="Tags"
+              visible={showDropDownTags}
+              showDropDown={() => setShowDropDownTags(true)}
+              onDismiss={() => setShowDropDownTags(false)}
+              value={currentTag}
+              setValue={setCurrentTag}
+              list={tagList}
+              dropDownStyle={styleListExpenses.dropDownStyle}
+              dropDownItemSelectedStyle={
+                styleListExpenses.dropDownItemSelectedStyle
+              }
+              dropDownItemStyle={styleListExpenses.dropDownItemStyle}
+              dropDownItemTextStyle={styleListExpenses.dropDownItemTextStyle}
+              activeColor={globalColors.background}
+              inputProps={[
+                styleListExpenses.inputButtons,
+                styleListExpenses.dropdown,
+              ]}
+            />
+          </View>
+          <View style={styleListExpenses.inputRowContainer}>
+            <Pressable
+              style={styleListExpenses.addCategoriesButton}
+              onPress={showModalFinished}>
+              <Text
+                variant="titleMedium"
+                style={styleListExpenses.addCategoriesButtonText}>
+                Tag
+              </Text>
+              <Icon
+                name={'add-outline'}
+                size={25}
+                color={globalColors.background}
+              />
+            </Pressable>
+            <Pressable
+              style={styleListExpenses.addCategoriesButton}
+              onPress={showModalRemove}>
+              <Text
+                variant="titleMedium"
+                style={styleListExpenses.addCategoriesButtonText}>
+                Tag
+              </Text>
+              <Icon
+                name={'remove-outline'}
+                size={25}
+                color={globalColors.background}
+              />
+            </Pressable>
+          </View>
+        </View>
         <View style={styleListExpenses.buttonContainer}>
           <View
             style={[
@@ -383,11 +418,14 @@ export const ExpensesScreen = () => {
               color={globalColors.background}
               onPress={() => {
                 setChecked(!checked);
-                setExpense({ ...expense, isFixed: !checked });
+                setExpense({...expense, isFixed: !checked});
               }}
             />
           </View>
-          <Button mode="contained" onPress={addExpense} style={styleListExpenses.button}>
+          <Button
+            mode="contained"
+            onPress={addExpense}
+            style={styleListExpenses.button}>
             Añadir
           </Button>
         </View>
@@ -411,12 +449,16 @@ export const ExpensesScreen = () => {
             />
             <View style={styleListExpenses.buttomModalButtons}>
               <Button onPress={addTag}>
-                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={styleListExpenses.nameTitleModal}>
                   Añadir
                 </Text>
               </Button>
               <Button onPress={hideModalFinished}>
-                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={styleListExpenses.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>
@@ -436,7 +478,7 @@ export const ExpensesScreen = () => {
             <FlatList
               data={tagList}
               keyExtractor={item => item.value}
-              renderItem={({ item }) => (
+              renderItem={({item}) => (
                 <View style={styleListExpenses.categoryItem}>
                   <Checkbox
                     status={
@@ -446,18 +488,24 @@ export const ExpensesScreen = () => {
                     }
                     onPress={() => toggleTagSelection(item.value)}
                   />
-                  <Text style={styleListExpenses.categoryItemText}>{item.label}</Text>
+                  <Text style={styleListExpenses.categoryItemText}>
+                    {item.label}
+                  </Text>
                 </View>
               )}
             />
             <View style={styleListExpenses.buttomModalButtons}>
               <Button onPress={removeTag}>
-                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={styleListExpenses.nameTitleModal}>
                   Eliminar
                 </Text>
               </Button>
               <Button onPress={hideModalRemove}>
-                <Text variant="titleMedium" style={styleListExpenses.nameTitleModal}>
+                <Text
+                  variant="titleMedium"
+                  style={styleListExpenses.nameTitleModal}>
                   Cancelar
                 </Text>
               </Button>

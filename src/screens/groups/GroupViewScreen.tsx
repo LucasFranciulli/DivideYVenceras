@@ -5,7 +5,7 @@ import {Text, Modal, Button, Divider} from 'react-native-paper';
 import {RootStackParamList} from '../../../App';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {User} from '../../utils/Users';
+import {User} from '../../utils/User';
 import {globalColors} from '../../themes/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Expense} from '../../utils/Expense';
