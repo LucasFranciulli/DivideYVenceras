@@ -21,15 +21,15 @@ export const ExpenseCard = ({
   const [visible, setVisible] = useState(false);
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
 
-  const formatDate = (date: Date) => {
-    const d = new Date(date);
+  const formatDate = (fecha: string) => {
+    const d = new Date(fecha);
     const day = d.getDate().toString().padStart(2, '0');
     const month = (d.getMonth() + 1).toString().padStart(2, '0');
     const year = d.getFullYear().toString().slice(-2);
     return `${day}/${month}/${year}`;
   };
 
-  const date = item.date ? formatDate(item.date) : '';
+  const fecha = item.fecha ? formatDate(item.fecha) : '';
 
   const showModalFinished = () => setVisibleModalFinished(true);
   const hideModalFinished = () => setVisibleModalFinished(false);
@@ -50,7 +50,7 @@ export const ExpenseCard = ({
     <View
       style={[
         styles.itemContainer,
-        item.isFixed ? styles.backgroundFixed : styles.backgroundNotFixed,
+        item.tipo === "FIJO" ? styles.backgroundFixed : styles.backgroundNotFixed,
       ]}>
       <View style={styles.itemDataContainer}>
         <View style={{gap: 10, width: '80%'}}>
@@ -63,21 +63,21 @@ export const ExpenseCard = ({
               <Text
                 variant="headlineMedium"
                 style={
-                  item.isFixed ? styles.nameTextFixed : styles.nameTitleText
+                  item.tipo === "FIJO" ? styles.nameTextFixed : styles.nameTitleText
                 }>
-                {item.name}
+                {item.nombre}
               </Text>
             </View>
             <View style={{alignSelf: 'flex-end'}}>
-              {item.date !== undefined && (
+              {item.fecha !== undefined && (
                 <Text
                   variant="titleLarge"
                   style={{
-                    color: item.isFixed
+                    color: item.tipo === "FIJO"
                       ? globalColors.background
                       : globalColors.grey,
                   }}>
-                  {date}
+                  {fecha}
                 </Text>
               )}
             </View>
@@ -85,25 +85,27 @@ export const ExpenseCard = ({
           <View style={styles.itemDataRowContainer}>
             <Text
               variant="titleLarge"
-              style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
-              {item.description}
+              style={item.tipo === "FIJO" ? styles.nameTextFixed : styles.nameText}>
+              {item.descripcion}
             </Text>
           </View>
           <View style={{flexDirection: 'row', gap: 20}}>
-            {item.category && (
+            {item.categoria && (
               <View style={[styles.itemDataRowContainer, styles.category]}>
                 <Text variant="titleMedium" style={styles.nameText}>
-                  {item.category}
+                  {item.categoria.nombre}
                 </Text>
               </View>
             )}
-            {item.tag && (
-              <View style={[styles.itemDataRowContainer, styles.tag]}>
+          {item.tags && item.tags.length > 0 && (
+            item.tags.map((tag, index) => (
+              <View key={index} style={[styles.itemDataRowContainer, styles.tag]}>
                 <Text variant="titleMedium" style={styles.nameText}>
-                  {item.tag}
+                  {tag.nombre}
                 </Text>
               </View>
-            )}
+            ))
+          )}
           </View>
         </View>
         <Menu
@@ -136,10 +138,10 @@ export const ExpenseCard = ({
         </Menu>
       </View>
       <Button
-        style={item.isFixed ? styles.buttonFixed : styles.button}
-        textColor={item.isFixed ? globalColors.dark : globalColors.background}
+        style={item.tipo === "FIJO" ? styles.buttonFixed : styles.button}
+        textColor={item.tipo === "FIJO" ? globalColors.dark : globalColors.background}
         onPress={showModalFinished}>
-        $ {item.amount}
+        $ {item.monto}
       </Button>
       <Portal>
         <Modal

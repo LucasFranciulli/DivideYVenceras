@@ -4,7 +4,7 @@ import { ApiResponse } from '../../../utils/ApiResponse';
 
 const postTag = async (newTag: Tag, token: string) => {
     const response = await axios.post<ApiResponse>(
-        'http://192.168.1.47:3000/api/tags',
+        'https://backenddycgestion-production.up.railway.app/api/tags',
         newTag,
         {
           headers: {

@@ -5,7 +5,7 @@ import { User } from '../../../utils/User';
 export const register = async (newUser: User) => {
   try {
     const response = await axios.post<ApiResponse>(
-        'http://192.168.1.47:3000/api/usuarios',
+        'https://backenddycgestion-production.up.railway.app/api/usuarios',
         {
             usuario: newUser.nombre_usuario,
             nombre: newUser.nombre,

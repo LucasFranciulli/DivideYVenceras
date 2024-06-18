@@ -15,6 +15,9 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import PersonalExpensesScreen from './PersonalExpensesScreen';
 import GroupExpensesScreen from './GroupExpensesScreen';
 import { SceneMap, SceneRendererProps, TabBar, TabView } from 'react-native-tab-view';
+import { getPersonalExpenses } from './services/personalExpenses';
+import { getgrupalExpenses } from './services/grupalExpenses';
+import { deleteExpenseBD } from './services/deleteExpenses';
 
 export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -22,6 +25,8 @@ export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
 >;
 
 export const ProfileScreen = () => {
+  const [personalExpenses, setPersonalExpenses] = useState<Expense[]>([]);
+  const [grupalExpenses, setGrupalExpenses] = useState<Expense[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const navigation = useNavigation<EditExpensesScreenNavigationProp>();
   const [filter, setFilter] = useState('week');
@@ -30,11 +35,15 @@ export const ProfileScreen = () => {
     React.useCallback(() => {
       const fetchExpenses = async () => {
         try {
-          const storedExpenses = await AsyncStorage.getItem('expenses');
           const token = await AsyncStorage.getItem('token');
-          if (storedExpenses) {
-            setExpenses(JSON.parse(storedExpenses));
+          if (token) {
+            const resPersonalExpenses = await getPersonalExpenses(token);
+            const resGrupalExpenses = await getgrupalExpenses(token);
+
+            setPersonalExpenses(resPersonalExpenses);
+            setGrupalExpenses(resGrupalExpenses);
           }
+
           if (token) {
             const t = JSON.parse(token)
             console.log(t);
@@ -52,24 +61,16 @@ export const ProfileScreen = () => {
     setFilter(input);
   };
 
-  const msjError = (message: string) => {
-    showToastError('Error', message);
-  };
-
-  const msjSuccess = (message: string) => {
-    showToastSuccess(message, '');
-  };
-
   const renderScene = SceneMap({
     personal: () => (
       <PersonalExpensesScreen
-        expenses={expenses}
+        expenses={personalExpenses}
         deleteExpense={deleteExpense}
       />
     ),
     group: () => (
       <GroupExpensesScreen
-        expenses={expenses}
+        expenses={grupalExpenses}
         deleteExpense={deleteExpense}
       />
     ),
@@ -77,9 +78,13 @@ export const ProfileScreen = () => {
 
   const deleteExpense = async (id: number) => {
     try {
-      const filteredExpenses = expenses.filter(expense => expense.id !== id);
-      await AsyncStorage.setItem('expenses', JSON.stringify(filteredExpenses));
-      setExpenses(filteredExpenses);
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const deleteEx = await deleteExpenseBD(token, id);
+        if (deleteEx) {
+          showToastSuccess('Gasto borrado con exito', '');
+        }
+      }
     } catch (error) {
       console.error('Error deleting expense:', error);
     }
@@ -90,13 +95,6 @@ export const ProfileScreen = () => {
     { key: 'personal', title: 'Historial' },
     { key: 'group', title: 'Gastos de Grupo' },
   ]);
-  const renderItem = ({item}: {item: Expense}) => (
-    <ExpenseCard
-      item={item}
-      deleteExpense={deleteExpense}
-      navigation={navigation}
-    />
-  );
 
   return (
     <View style={styles.container}>
