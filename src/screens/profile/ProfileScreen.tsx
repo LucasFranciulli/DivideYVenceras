@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {FlatList, View} from 'react-native';
+import {Dimensions, FlatList, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import {Expense} from '../../utils/Expense';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +11,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {styles} from './style';
 import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 import {Filters} from '../../components/filters/Filters';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import PersonalExpensesScreen from './PersonalExpensesScreen';
+import GroupExpensesScreen from './GroupExpensesScreen';
+import { SceneMap, SceneRendererProps, TabBar, TabView } from 'react-native-tab-view';
 
 export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -56,6 +60,21 @@ export const ProfileScreen = () => {
     showToastSuccess(message, '');
   };
 
+  const renderScene = SceneMap({
+    personal: () => (
+      <PersonalExpensesScreen
+        expenses={expenses}
+        deleteExpense={deleteExpense}
+      />
+    ),
+    group: () => (
+      <GroupExpensesScreen
+        expenses={expenses}
+        deleteExpense={deleteExpense}
+      />
+    ),
+  });
+
   const deleteExpense = async (id: number) => {
     try {
       const filteredExpenses = expenses.filter(expense => expense.id !== id);
@@ -65,13 +84,16 @@ export const ProfileScreen = () => {
       console.error('Error deleting expense:', error);
     }
   };
-
+  
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'personal', title: 'Historial' },
+    { key: 'group', title: 'Gastos de Grupo' },
+  ]);
   const renderItem = ({item}: {item: Expense}) => (
     <ExpenseCard
       item={item}
       deleteExpense={deleteExpense}
-      showToastSuccess={msjSuccess}
-      showToastError={msjError}
       navigation={navigation}
     />
   );
@@ -83,32 +105,21 @@ export const ProfileScreen = () => {
           Gastos
         </Text>
       </View>
-      {expenses.length === 0 ? (
-        <Text style={styles.noDataText}>No hay gastos.</Text>
-      ) : (
-        <>
-          <Filters filter={filter} handleSetFilter={handleSetFilter} />
-          <View style={styles.circleContainer}>
-            <View style={styles.circleContainerItem}>
-              <View style={styles.circleFixed} />
-              <Text variant="titleLarge" style={styles.circleText}>
-                Gasto Fijo
-              </Text>
-            </View>
-            <View style={styles.circleContainerItem}>
-              <View style={styles.circleNotFixed} />
-              <Text variant="titleLarge" style={styles.circleText}>
-                Gasto Normal
-              </Text>
-            </View>
-          </View>
-          <FlatList
-            data={expenses}
-            renderItem={renderItem}
-            keyExtractor={item => item.id.toString()}
+      <View style={{ flex: 1 }}>
+        <TabView
+          navigationState={{ index, routes }}
+          onIndexChange={setIndex}
+          initialLayout={{ width: Dimensions.get('window').width }}
+          renderTabBar={(props) => (
+            <TabBar
+              {...props}
+              indicatorStyle={{ backgroundColor: 'black' }}
+              style={{ backgroundColor: 'white' }}
+              labelStyle={{ color: 'black' }} />
+          )} 
+          renderScene={renderScene}        
           />
-        </>
-      )}
+      </View>
     </View>
   );
 };

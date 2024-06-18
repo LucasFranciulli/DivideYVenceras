@@ -5,20 +5,17 @@ import {Expense} from '../../utils/Expense';
 import {globalColors} from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {EditExpensesScreenNavigationProp} from '../../screens/profile/ProfileScreen';
+import { showToastError, showToastSuccess } from '../../utils/ToastActions';
 
 interface Props {
   item: Expense;
   deleteExpense: (id: number) => Promise<void>;
-  showToastSuccess: (message: string) => void;
-  showToastError: (message: string) => void;
   navigation: EditExpensesScreenNavigationProp;
 }
 
 export const ExpenseCard = ({
   item,
   deleteExpense,
-  showToastSuccess,
-  showToastError,
   navigation,
 }: Props) => {
   const [visible, setVisible] = useState(false);
@@ -41,12 +38,11 @@ export const ExpenseCard = ({
   const closeMenu = () => setVisible(false);
 
   const handleEliminate = (itemId: number) => {
-    //TODO: cuando se elimine correctamente poner un try y catch, en el catch poner el error toast
     try {
-      showToastSuccess('El gasto fue pagado!');
+      showToastSuccess('El gasto fue pagado!', '');
       deleteExpense(itemId);
     } catch (err) {
-      showToastError('Hubo un problema al completar el pago');
+      showToastError('Error', 'Hubo un problema al completar el pago');
     }
   };
 
