@@ -1,12 +1,45 @@
 export interface Expense {
   id: number;
-  name: string;
-  description: string;
-  amount: number;
-  expirationDate?: Date;
-  category?: string;
-  isFixed: boolean;
-  tag?: string;
-  date: Date;
-  group?: String;
+  nombre: string;
+  descripcion: string;
+  monto: string;
+  monto_pagado: string;
+  tipo: string;
+  liquidacion: string;
+  fecha: string;
+  id_categoria: number;
+  id_grupo: number | null;
+  categoria: {
+    nombre: string;
+  };
+  gastoFijo: {
+    id: number;
+    frecuencia: string;
+    proxima_fecha: string;
+    agendado: boolean;
+    id_gasto: number;
+  };
+  tags: {
+    nombre: string;
+    GastoTag: {
+      id: number;
+      id_gasto: number;
+      id_tag: number;
+    };
+  }[];
+  usuarios?: {
+    id: number,
+    nombre_usuario: string,
+    nombre: string,
+    apellido: string,
+    email: string,
+    contraseña: string,
+    saldo: string,
+    gastos_usuarios: {
+      id_gasto: number,
+      id_usuario: number,
+      monto_pagado: string,
+      metodo_pago: string
+    }
+  }[]
 }
