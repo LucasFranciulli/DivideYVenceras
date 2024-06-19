@@ -15,12 +15,13 @@ import {EditExpensesScreenNavigationProp} from './src/screens/profile/ProfileScr
 import { GroupViewScreen } from './src/screens/groups/GroupViewScreen';
 import { Group } from './src/utils/Group';
 import GroupsScreen, { GroupsScreenNavigationProp } from './src/screens/groups/GroupsScreen';
+import { ExpenseRequest } from './src/utils/ExpenseRequest';
 
 export type RootStackParamList = {
   LoginScreen: undefined;
   RegisterScreen: undefined;
   HomeScreen: undefined;
-  EditExpenses: {item: Expense; navigation: EditExpensesScreenNavigationProp};
+  EditExpenses: {item: ExpenseRequest; navigation: EditExpensesScreenNavigationProp};
   BottomTabsHomeNavigator: undefined;
   GroupView: {group: Group, exitGroup: (id: number) => Promise<void>, navigation: GroupsScreenNavigationProp};
   ListGroups: undefined;

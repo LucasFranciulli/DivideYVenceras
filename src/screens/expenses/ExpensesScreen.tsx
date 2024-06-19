@@ -23,6 +23,8 @@ import { postExpenseGrupal } from './services/grupalExpense';
 import { postExpensePersonal } from './services/personalExpense';
 import { GroupRequest } from '../../utils/GroupRequest';
 import { getMyGroups } from './services/getMyGroups';
+import { getMyTags, getMyTagsGroups } from './services/tags';
+import { Tag } from '../../utils/Tag';
 
 export const ExpensesScreen = () => {
   const [showDropDownCategories, setShowDropDownCategories] = useState(false);
@@ -45,15 +47,16 @@ export const ExpensesScreen = () => {
   const hideModalRemove = () => setVisibleModalRemove(false);
 
   const [categoriesList, setCategoriesList] = useState<Category[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
   const [categotySelected, setCategotySelected] = useState<Category | null>(
     null,
   );
   const [currentCategory, setCurrentCategory] = useState('');
-  const [currentTag, setCurrentTag] = useState('');
 
   const [newTag, setNewTag] = useState('');
-  const [tagList, setTagList] = useState([]);
+  const [tagList, setTagList] = useState<Tag[]>([]);
+  const [currentTag, setCurrentTag] = useState('');
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
@@ -70,7 +73,6 @@ export const ExpensesScreen = () => {
   const [checked, setChecked] = useState(false);
   const [checkedPagado, setCheckedPagado] = useState(false);
 
-  //TODO ESTO SACARLO
   const [groupList, setGroupList] = useState<GroupRequest[]>([]);
   const [currentGroup, setCurrentGroup] = useState<number>();
   const [showDropDownGroups, setShowDropDownGroups] = useState(false);
@@ -138,11 +140,16 @@ export const ExpensesScreen = () => {
     };
 
     try {
-      const storedTags = await AsyncStorage.getItem('tags');
-      const tags = storedTags ? JSON.parse(storedTags) : [];
-      const updatedTags = [...tags, newTagItem];
-      await AsyncStorage.setItem('tags', JSON.stringify(updatedTags));
-      setTagList(prevTag => [...prevTag, newTagItem]);
+      
+      const newTagReq: Tag = {
+        nombre: newTag,
+        descripcion: '',
+        color: '',
+      }
+
+      newTagReq.id_grupo = currentGroup ? currentGroup : undefined;
+
+      setTagList(prevTag => [...prevTag, newTagReq]);
       setNewTag('');
       hideModalFinished();
       showToastSuccess('Tag añadido!', '');
@@ -154,10 +161,7 @@ export const ExpensesScreen = () => {
 
   const removeTag = async () => {
     try {
-      const storedTags = await AsyncStorage.getItem('tags');
-      let tags = storedTags ? JSON.parse(storedTags) : [];
-      tags = tags.filter((tag: any) => !selectedTags.includes(tag.value));
-      await AsyncStorage.setItem('tags', JSON.stringify(tags));
+      let tags = tagList.filter((tag) => !selectedTags.includes(tag.value));
       setTagList(tags);
       setSelectedTags([]);
       hideModalRemove();
@@ -178,20 +182,22 @@ export const ExpensesScreen = () => {
     });
   };
 
-  useEffect(() => {
-    const loadTags = async () => {
-      try {
-        const storedTags = await AsyncStorage.getItem('tags');
-        if (storedTags) {
-          setTagList(JSON.parse(storedTags));
+  const loadTags = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        if (currentGroup) {
+          const storedTags = await getMyTagsGroups(token, currentGroup);
+          setTagList(storedTags);
+        } else {
+          const storedTags = await getMyTags(token);
+          setTagList(storedTags);
         }
-      } catch (error) {
-        console.error('Error loading tags:', error);
       }
-    };
-
-    loadTags();
-  }, []);
+    } catch (error) {
+      console.error('Error loading tags:', error);
+    }
+  };
 
   useEffect(() => {
     setExpense({...expense, id_categoria: parseInt(currentCategory)});
@@ -211,10 +217,9 @@ export const ExpensesScreen = () => {
     setExpense({...expense, fecha: date.toString()});
   }, [date]);
 
-  // useEffect(() => {
-  //   setExpense({...expense, group: currentGroup});
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [currentGroup]);
+  useEffect(() => {
+    loadTags();
+  }, [currentGroup]);
 
   return (
     <View style={styleListExpenses.container}>
