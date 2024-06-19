@@ -21,7 +21,7 @@ export type RootStackParamList = {
   LoginScreen: undefined;
   RegisterScreen: undefined;
   HomeScreen: undefined;
-  EditExpenses: {item: ExpenseRequest; navigation: EditExpensesScreenNavigationProp};
+  EditExpenses: {item: Expense; navigation: EditExpensesScreenNavigationProp};
   BottomTabsHomeNavigator: undefined;
   GroupView: {group: Group, exitGroup: (id: number) => Promise<void>, navigation: GroupsScreenNavigationProp};
   ListGroups: undefined;

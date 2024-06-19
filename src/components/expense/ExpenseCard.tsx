@@ -42,7 +42,7 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
       showToastError('Error', 'Hubo un problema al completar el pago');
     }
   };
-  console.log("item.tags: ", item.tags);
+
   return (
     <View
       style={[

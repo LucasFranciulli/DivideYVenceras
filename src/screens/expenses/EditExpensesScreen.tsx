@@ -1,68 +1,125 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Checkbox, Text, TextInput } from 'react-native-paper';
-import { RootStackParamList } from '../../../App';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { Pressable, ScrollView, View } from 'react-native';
-import { globalColors } from '../../themes/theme';
+import React, {useEffect, useState} from 'react';
+import {Button, Checkbox, Text, TextInput} from 'react-native-paper';
+import {RootStackParamList} from '../../../App';
+import {RouteProp, useRoute} from '@react-navigation/native';
+import {Pressable, ScrollView, View} from 'react-native';
+import {globalColors} from '../../themes/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatePicker from 'react-native-date-picker';
 import DropDown from 'react-native-paper-dropdown';
-import { showToastError, showToastSuccess } from '../../utils/ToastActions';
-import { styleEditExpenses } from './style';
+import {showToastError, showToastSuccess} from '../../utils/ToastActions';
+import {styleEditExpenses} from './style';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { ExpenseRequest } from '../../utils/ExpenseRequest';
+import {ExpenseRequest} from '../../utils/ExpenseRequest';
+import {editExpensePersonal} from './services/personalExpense';
+import {Expense} from '../../utils/Expense';
+import {ExpenseEdit} from '../../utils/ExpenseEdit';
+import {getCategory} from '../../utils/GetCategories';
+import {getTags} from '../../utils/GetTags';
+import {Category} from '../../utils/Category';
+import {getCategorias} from './services/categorias';
+import {getMyTags} from './services/tags';
+import { Tag } from '../../utils/Tag';
 
-type EditExpensesScreenRouteProp = RouteProp<RootStackParamList, 'EditExpenses'>;
+type EditExpensesScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'EditExpenses'
+>;
 
 export const EditExpensesScreen = () => {
   const route = useRoute<EditExpensesScreenRouteProp>();
-  const { item, navigation } = route.params;
+  const {item, navigation} = route.params;
+
+  console.log('ITEM A EDITAR: ', item);
 
   const [expense, setExpense] = useState<ExpenseRequest>({
     nombre: item.nombre,
     descripcion: item.descripcion,
-    monto: item.monto,
-    fecha: item.fecha,
+    monto: Number(item.monto),
+    fecha: item.fecha.toString(),
     id_categoria: item.id_categoria,
-    tags: item.tags,
-    saldado: item.saldado,
+    tags: item.tags && item.tags.length > 0 ? [item.tags[0].GastoTag.id] : [],
+    saldado: item.monto === item.monto_pagado,
   });
+  const [categoryToEdit, setCategoryToEdit] = useState<string>('');
+  const [tagToEdit, setTagToEdit] = useState<string>('');
 
-  const [checked, setChecked] = useState(item.saldado);
+  const [checked, setChecked] = useState(item.monto === item.monto_pagado);
   const [showDropDownCategories, setShowDropDownCategories] = useState(false);
   const [showDropDownTags, setShowDropDownTags] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(item.id_categoria);
   const [currentTag, setCurrentTag] = useState(item.tags);
-  const [categoriesList, setCategoriesList] = useState([
-    { label: 'Comida', value: 'comida' },
-    { label: 'Ropa', value: 'ropa' },
-    { label: 'Higiene', value: 'higiene' },
-    { label: 'Tecnología', value: 'tecnologia' },
-    { label: 'Bebidas', value: 'bebidas' },
-    { label: 'Farmacia', value: 'farmacia' },
-    { label: 'Entretenimiento', value: 'entretenimiento' },
-    { label: 'Otro', value: 'otro' },
-  ]);
+  const [categoriesList, setCategoriesList] = useState<LabelValue[]>([]);
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(new Date(item.fecha));
-  const [tagsList, setTagsList] = useState([]);
+  const [tagsList, setTagsList] = useState<LabelValue[]>([]);
+
+  interface LabelValue {
+    label: string;
+    value: string;
+  }
+  const transformCategories = (categories: Category[]): LabelValue[] => {
+    return categories.map(category => ({
+      label: category.nombre,
+      value: category.nombre,
+    }));
+  };
+
+  function transformTags(tags: Tag[]): LabelValue[] {
+    return tags.map(tag => ({
+      label: tag.nombre,
+      value: tag.nombre.toLowerCase().replace(/\s+/g, ''),
+    }));
+  }
+
+  const configureTagsAndCategories = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      const categoryToEdit = await getCategory(expense.id_categoria, token);
+      setCategoryToEdit(categoryToEdit);
+      const tagToEdit = await getTags(expense.tags[0], token);
+      setTagToEdit(tagToEdit);
+
+      const categoriasObtenidas = await getCategorias(token);
+      const categoriasSeteadas = transformCategories(categoriasObtenidas);
+      setCategoriesList(categoriasSeteadas);
+
+      const tagsObtenidos = await getMyTags(token);
+      const tagsSeteadas = transformTags(tagsObtenidos);
+      setTagsList(tagsSeteadas);
+      console.log('categoriasSeteadas: ', categoriasSeteadas);
+      console.log('CATEGORIA QUE SE SETEO: ', categoryToEdit);
+      console.log('TAGS QUE SE SETEO: ', tagToEdit);
+    }
+  };
+
+  useEffect(() => {
+    configureTagsAndCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateExpense = async () => {
     try {
-      const storedExpenses = await AsyncStorage.getItem('expenses');
+      /* const storedExpenses = await AsyncStorage.getItem('expenses');
       const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
 
       const expenseIndex = expenses.findIndex(
         (exp: ExpenseRequest) => exp.nombre === item.nombre,
-      );
-
-      if (expenseIndex !== -1) {
-        expenses[expenseIndex] = expense;
-        await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
+      ); */
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        /* const categoryToEdit = await getCategory(expense.categoria, token);
+        const tagToEdit = await getTag(expense.tipo, token); */
+        const expenseToEdit: ExpenseEdit = {
+          nombre: expense.nombre,
+          monto: Number(expense.monto),
+          fecha: expense.fecha,
+          categoria: categoryToEdit,
+          etiquetas: tagToEdit,
+        };
+        await editExpensePersonal(expenseToEdit, token, item.id);
         showToastSuccess('Gasto actualizado!', '');
         navigation.goBack();
-      } else {
-        showToastError('Error', 'No se encontró el gasto para actualizar');
       }
     } catch (error) {
       showToastError('Error', 'No se pudo actualizar el gasto');
@@ -101,7 +158,7 @@ export const EditExpensesScreen = () => {
               color={globalColors.primary}
               onPress={() => {
                 setChecked(!checked);
-                setExpense({ ...expense, saldado: !checked });
+                setExpense({...expense, saldado: !checked});
               }}
             />
           </View>
@@ -112,7 +169,7 @@ export const EditExpensesScreen = () => {
             <TextInput
               placeholder="Nombre"
               value={expense.nombre}
-              onChangeText={text => setExpense({ ...expense, nombre: text })}
+              onChangeText={text => setExpense({...expense, nombre: text})}
               style={styleEditExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -125,7 +182,7 @@ export const EditExpensesScreen = () => {
             <TextInput
               placeholder="Descripción"
               value={expense.descripcion}
-              onChangeText={text => setExpense({ ...expense, descripcion: text })}
+              onChangeText={text => setExpense({...expense, descripcion: text})}
               style={styleEditExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -140,7 +197,7 @@ export const EditExpensesScreen = () => {
               value={expense.monto.toString()}
               onChangeText={text => {
                 const amount = parseFloat(text);
-                setExpense({ ...expense, monto: isNaN(amount) ? 0 : amount });
+                setExpense({...expense, monto: isNaN(amount) ? 0 : amount});
               }}
               keyboardType="numeric"
               style={styleEditExpenses.inputButtons}
@@ -167,7 +224,7 @@ export const EditExpensesScreen = () => {
               onConfirm={date => {
                 setOpen(false);
                 setDate(date);
-                setExpense({ ...expense, fecha: date.toISOString() });
+                setExpense({...expense, fecha: date.toISOString()});
               }}
               onCancel={() => {
                 setOpen(false);
@@ -175,7 +232,8 @@ export const EditExpensesScreen = () => {
               mode="date"
             />
           </View>
-          <View style={[styleEditExpenses.inputContainer, styleEditExpenses.drop]}>
+          <View
+            style={[styleEditExpenses.inputContainer, styleEditExpenses.drop]}>
             <Text variant="headlineSmall" style={styleEditExpenses.inputTitle}>
               Categoría
             </Text>
@@ -188,15 +246,20 @@ export const EditExpensesScreen = () => {
               value={currentCategory}
               setValue={text => {
                 setCurrentCategory(text);
-                setExpense({ ...expense, id_categoria: parseInt(text) });
+                setExpense({...expense, id_categoria: parseInt(text)});
               }}
               list={categoriesList}
               dropDownStyle={styleEditExpenses.dropDownStyle}
-              dropDownItemSelectedStyle={styleEditExpenses.dropDownItemSelectedStyle}
+              dropDownItemSelectedStyle={
+                styleEditExpenses.dropDownItemSelectedStyle
+              }
               dropDownItemStyle={styleEditExpenses.dropDownItemStyle}
               dropDownItemTextStyle={styleEditExpenses.dropDownItemTextStyle}
               activeColor={globalColors.background}
-              inputProps={[styleEditExpenses.inputButtons, styleEditExpenses.dropdown]}
+              inputProps={[
+                styleEditExpenses.inputButtons,
+                styleEditExpenses.dropdown,
+              ]}
             />
           </View>
           <View style={styleEditExpenses.inputContainer}>
@@ -212,21 +275,29 @@ export const EditExpensesScreen = () => {
               value={currentTag}
               setValue={text => {
                 setCurrentTag(text);
-                setExpense({ ...expense, tags: [parseInt(text)] });
+                setExpense({...expense, tags: [parseInt(text)]});
               }}
               list={tagsList}
               dropDownStyle={styleEditExpenses.dropDownStyle}
-              dropDownItemSelectedStyle={styleEditExpenses.dropDownItemSelectedStyle}
+              dropDownItemSelectedStyle={
+                styleEditExpenses.dropDownItemSelectedStyle
+              }
               dropDownItemStyle={styleEditExpenses.dropDownItemStyle}
               dropDownItemTextStyle={styleEditExpenses.dropDownItemTextStyle}
               activeColor={globalColors.background}
-              inputProps={[styleEditExpenses.inputButtons, styleEditExpenses.dropdown]}
+              inputProps={[
+                styleEditExpenses.inputButtons,
+                styleEditExpenses.dropdown,
+              ]}
             />
           </View>
         </View>
       </ScrollView>
       <View style={styleEditExpenses.buttonContainer}>
-        <Button mode="contained" onPress={updateExpense} style={styleEditExpenses.button}>
+        <Button
+          mode="contained"
+          onPress={updateExpense}
+          style={styleEditExpenses.button}>
           Actualizar
         </Button>
       </View>
