@@ -6,7 +6,7 @@ export interface Expense {
   monto_pagado: string;
   tipo: string;
   liquidacion: string;
-  fecha: string;
+  fecha: Date;
   id_categoria: number;
   id_grupo: number | null;
   categoria: {
@@ -18,7 +18,7 @@ export interface Expense {
     proxima_fecha: string;
     agendado: boolean;
     id_gasto: number;
-  };
+  } | null;
   tags: {
     nombre: string;
     GastoTag: {
@@ -26,7 +26,7 @@ export interface Expense {
       id_gasto: number;
       id_tag: number;
     };
-  }[];
+  }[] | null;
   usuarios?: {
     id: number,
     nombre_usuario: string,

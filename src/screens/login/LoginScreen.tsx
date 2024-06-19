@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Pressable, View } from 'react-native';
-import { Button, Checkbox, Text, TextInput } from 'react-native-paper';
+import React, {useState, useEffect} from 'react';
+import {Pressable, View} from 'react-native';
+import {Button, Checkbox, Text, TextInput} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { showToastError, showToastSuccess } from '../../utils/ToastActions';
+import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 import * as service from './services/login';
 import styles from './style';
 
-export const LoginScreen = ({ navigation }: any) => {
+export const LoginScreen = ({navigation}: any) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [hidePassword, setHidePassword] = useState(true);
@@ -16,7 +16,9 @@ export const LoginScreen = ({ navigation }: any) => {
   useEffect(() => {
     const checkStoredCredentials = async () => {
       try {
-        const storedRememberPassword = await AsyncStorage.getItem('rememberPassword');
+        const storedRememberPassword = await AsyncStorage.getItem(
+          'rememberPassword',
+        );
         if (storedRememberPassword === 'true') {
           const storedUsername = await AsyncStorage.getItem('username');
           const storedPassword = await AsyncStorage.getItem('password');
@@ -34,6 +36,18 @@ export const LoginScreen = ({ navigation }: any) => {
 
     checkStoredCredentials();
   }, []);
+
+  const handleSetRememberPassword = async () => {
+    await AsyncStorage.setItem(
+      'rememberPassword',
+      rememberPassword ? 'true' : 'false',
+    );
+  };
+
+  useEffect(() => {
+    handleSetRememberPassword();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rememberPassword]);
 
   const handleHidePassword = () => {
     setHidePassword(!hidePassword);
@@ -112,7 +126,8 @@ export const LoginScreen = ({ navigation }: any) => {
               />
               <Text variant="bodyMedium">Recordar</Text>
             </View>
-            <Pressable onPress={() => console.log('Olvidaste tu contraseña clicked!')}>
+            <Pressable
+              onPress={() => console.log('Olvidaste tu contraseña clicked!')}>
               <Text variant="bodyMedium">¿Olvidaste tu contraseña?</Text>
             </Pressable>
           </View>

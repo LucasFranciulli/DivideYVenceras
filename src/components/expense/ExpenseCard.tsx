@@ -5,7 +5,7 @@ import {Expense} from '../../utils/Expense';
 import {globalColors} from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {EditExpensesScreenNavigationProp} from '../../screens/profile/ProfileScreen';
-import { showToastError, showToastSuccess } from '../../utils/ToastActions';
+import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 
 interface Props {
   item: Expense;
@@ -13,13 +13,10 @@ interface Props {
   navigation: EditExpensesScreenNavigationProp;
 }
 
-export const ExpenseCard = ({
-  item,
-  deleteExpense,
-  navigation,
-}: Props) => {
+export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
   const [visible, setVisible] = useState(false);
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
+
 
   const formatDate = (date: Date) => {
     const d = new Date(date);
@@ -29,7 +26,7 @@ export const ExpenseCard = ({
     return `${day}/${month}/${year}`;
   };
 
-  const date = item.date ? formatDate(item.date) : '';
+  const date = item.fecha ? formatDate(item.fecha) : '';
 
   const showModalFinished = () => setVisibleModalFinished(true);
   const hideModalFinished = () => setVisibleModalFinished(false);
@@ -50,7 +47,7 @@ export const ExpenseCard = ({
     <View
       style={[
         styles.itemContainer,
-        item.isFixed ? styles.backgroundFixed : styles.backgroundNotFixed,
+        item.gastoFijo ? styles.backgroundFixed : styles.backgroundNotFixed,
       ]}>
       <View style={styles.itemDataContainer}>
         <View style={{gap: 10, width: '80%'}}>
@@ -63,17 +60,17 @@ export const ExpenseCard = ({
               <Text
                 variant="headlineMedium"
                 style={
-                  item.isFixed ? styles.nameTextFixed : styles.nameTitleText
+                  item.gastoFijo ? styles.nameTextFixed : styles.nameTitleText
                 }>
-                {item.name}
+                {item.nombre}
               </Text>
             </View>
             <View style={{alignSelf: 'flex-end'}}>
-              {item.date !== undefined && (
+              {item.fecha !== undefined && (
                 <Text
                   variant="titleLarge"
                   style={{
-                    color: item.isFixed
+                    color: item.gastoFijo
                       ? globalColors.background
                       : globalColors.grey,
                   }}>
@@ -85,25 +82,28 @@ export const ExpenseCard = ({
           <View style={styles.itemDataRowContainer}>
             <Text
               variant="titleLarge"
-              style={item.isFixed ? styles.nameTextFixed : styles.nameText}>
-              {item.description}
+              style={item.gastoFijo ? styles.nameTextFixed : styles.nameText}>
+              {item.descripcion}
             </Text>
           </View>
           <View style={{flexDirection: 'row', gap: 20}}>
-            {item.category && (
+            {item.categoria && item.categoria.nombre !== '' && (
               <View style={[styles.itemDataRowContainer, styles.category]}>
                 <Text variant="titleMedium" style={styles.nameText}>
-                  {item.category}
+                  {item.categoria.nombre}
                 </Text>
               </View>
             )}
-            {item.tag && (
-              <View style={[styles.itemDataRowContainer, styles.tag]}>
-                <Text variant="titleMedium" style={styles.nameText}>
-                  {item.tag}
-                </Text>
-              </View>
-            )}
+            {item.tags && item.tags.length > 0 &&
+              item.tags.map(tag => (
+                <View
+                  key={tag.GastoTag.id}
+                  style={[styles.itemDataRowContainer, styles.tag]}>
+                  <Text variant="titleMedium" style={styles.nameText}>
+                    {tag.nombre}
+                  </Text>
+                </View>
+              ))}
           </View>
         </View>
         <Menu
@@ -136,10 +136,10 @@ export const ExpenseCard = ({
         </Menu>
       </View>
       <Button
-        style={item.isFixed ? styles.buttonFixed : styles.button}
-        textColor={item.isFixed ? globalColors.dark : globalColors.background}
+        style={item.gastoFijo ? styles.buttonFixed : styles.button}
+        textColor={item.gastoFijo ? globalColors.dark : globalColors.background}
         onPress={showModalFinished}>
-        $ {item.amount}
+        $ {item.monto}
       </Button>
       <Portal>
         <Modal

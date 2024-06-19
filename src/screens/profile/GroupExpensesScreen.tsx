@@ -28,6 +28,7 @@ const GroupExpensesScreen = ({ expenses, deleteExpense }: Props) => {
         />
     );
 
+
     return (
         <View style={{ flex: 1 }}>
         {expenses.length === 0 ? (
