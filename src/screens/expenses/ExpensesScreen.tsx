@@ -266,10 +266,6 @@ export const ExpensesScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTags, currentTag]);
 
-  useEffect(() => {
-    console.log('currentTag: ', currentTag);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTag]);
 
   return (
     <View style={styleListExpenses.container}>
@@ -393,7 +389,7 @@ export const ExpensesScreen = () => {
               }))}
             />
           </View>
-          {currentGroup && (
+          {/* {currentGroup && (
             <View style={styleListExpenses.inputContainer}>
               <DropDown
                 label={'Frecuencia'}
@@ -406,7 +402,7 @@ export const ExpensesScreen = () => {
                 list={frequencyOptions}
               />
             </View>
-          )}
+          )} */}
         </View>
         <View style={styleListExpenses.inputContainer}>
           <View style={styleListExpenses.inputContainer}>
@@ -472,7 +468,7 @@ export const ExpensesScreen = () => {
           </View>
         </View>
         <View style={styleListExpenses.buttonContainer}>
-          <View
+          {currentGroup === undefined && <View
             style={[
               styleListExpenses.fixedExpense,
               checked === false && styleListExpenses.notCheckedButtom,
@@ -492,7 +488,7 @@ export const ExpensesScreen = () => {
                 setChecked(!checked);
               }}
             />
-          </View>
+          </View>}
           <View
             style={[
               styleListExpenses.fixedExpense,
