@@ -26,7 +26,7 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
     return `${day}/${month}/${year}`;
   };
 
-  const date = item.fecha ? formatDate(item.fecha) : '';
+  const fecha = item.fecha ? formatDate(item.fecha) : '';
 
   const showModalFinished = () => setVisibleModalFinished(true);
   const hideModalFinished = () => setVisibleModalFinished(false);
@@ -42,12 +42,12 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
       showToastError('Error', 'Hubo un problema al completar el pago');
     }
   };
-
+  console.log("item.tags: ", item.tags);
   return (
     <View
       style={[
         styles.itemContainer,
-        item.gastoFijo ? styles.backgroundFixed : styles.backgroundNotFixed,
+        item.tipo === "FIJO" ? styles.backgroundFixed : styles.backgroundNotFixed,
       ]}>
       <View style={styles.itemDataContainer}>
         <View style={{gap: 10, width: '80%'}}>
@@ -60,7 +60,7 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
               <Text
                 variant="headlineMedium"
                 style={
-                  item.gastoFijo ? styles.nameTextFixed : styles.nameTitleText
+                  item.tipo === "FIJO" ? styles.nameTextFixed : styles.nameTitleText
                 }>
                 {item.nombre}
               </Text>
@@ -70,11 +70,11 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
                 <Text
                   variant="titleLarge"
                   style={{
-                    color: item.gastoFijo
+                    color: item.tipo === "FIJO"
                       ? globalColors.background
                       : globalColors.grey,
                   }}>
-                  {date}
+                  {fecha}
                 </Text>
               )}
             </View>
@@ -82,7 +82,7 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
           <View style={styles.itemDataRowContainer}>
             <Text
               variant="titleLarge"
-              style={item.gastoFijo ? styles.nameTextFixed : styles.nameText}>
+              style={item.tipo === "FIJO" ? styles.nameTextFixed : styles.nameText}>
               {item.descripcion}
             </Text>
           </View>
@@ -94,16 +94,15 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
                 </Text>
               </View>
             )}
-            {item.tags && item.tags.length > 0 &&
-              item.tags.map(tag => (
-                <View
-                  key={tag.GastoTag.id}
-                  style={[styles.itemDataRowContainer, styles.tag]}>
-                  <Text variant="titleMedium" style={styles.nameText}>
-                    {tag.nombre}
-                  </Text>
-                </View>
-              ))}
+          {item.tags && item.tags.length > 0 && (
+            item.tags.map((tag, index) => (
+              <View key={index} style={[styles.itemDataRowContainer, styles.tag]}>
+                <Text variant="titleMedium" style={styles.nameText}>
+                  {tag.nombre}
+                </Text>
+              </View>
+            ))
+          )}
           </View>
         </View>
         <Menu
@@ -136,8 +135,8 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
         </Menu>
       </View>
       <Button
-        style={item.gastoFijo ? styles.buttonFixed : styles.button}
-        textColor={item.gastoFijo ? globalColors.dark : globalColors.background}
+        style={item.tipo === "FIJO" ? styles.buttonFixed : styles.button}
+        textColor={item.tipo === "FIJO" ? globalColors.dark : globalColors.background}
         onPress={showModalFinished}>
         $ {item.monto}
       </Button>

@@ -18,10 +18,25 @@ import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 import DatePicker from 'react-native-date-picker';
 import {getCategorias} from './services/categorias';
 import {Category} from '../../utils/Category';
+import {ExpenseRequest} from '../../utils/ExpenseRequest';
+import {postExpenseGrupal} from './services/grupalExpense';
+import {postExpensePersonal} from './services/personalExpense';
+import {GroupRequest} from '../../utils/GroupRequest';
+import {getMyGroups} from './services/getMyGroups';
+import {getMyTags, getMyTagsGroups, postTag} from './services/tags';
+import {Tag} from '../../utils/Tag';
 
 export const ExpensesScreen = () => {
   const [showDropDownCategories, setShowDropDownCategories] = useState(false);
   const [showDropDownTags, setShowDropDownTags] = useState(false);
+
+  const [showDropDownFrequency, setShowDropDownFrequency] = useState(false);
+  const [frequency, setFrequency] = useState('anualmente');
+  const frequencyOptions = [
+    {label: 'Semanalmente', value: 'semanalmente'},
+    {label: 'Mensualmente', value: 'mensualmente'},
+    {label: 'Anualmente', value: 'anualmente'},
+  ];
 
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
   const [visibleModalRemove, setVisibleModalRemove] = useState(false);
@@ -32,52 +47,48 @@ export const ExpensesScreen = () => {
   const hideModalRemove = () => setVisibleModalRemove(false);
 
   const [categoriesList, setCategoriesList] = useState<Category[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
   const [categotySelected, setCategotySelected] = useState<Category | null>(
     null,
   );
   const [currentCategory, setCurrentCategory] = useState('');
-  const [currentTag, setCurrentTag] = useState('');
+
   const [newTag, setNewTag] = useState('');
-  const [tagList, setTagList] = useState([]);
+  const [tagList, setTagList] = useState<Tag[]>([]);
+  const [currentTag, setCurrentTag] = useState('');
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
 
-  const [expense, setExpense] = useState<Expense>({
-    id: Date.now() * Math.floor(Math.random() * 100) + 10,
-    name: '',
-    description: '',
-    amount: 0,
-    expirationDate: undefined,
-    category: '',
-    isFixed: false,
-    tag: '',
-    date: new Date(),
+  const [expense, setExpense] = useState<ExpenseRequest>({
+    nombre: '',
+    descripcion: '',
+    monto: 0,
+    fecha: '19/06/2024',
+    id_categoria: 0,
+    tags: [],
+    saldado: false,
   });
   const [checked, setChecked] = useState(false);
+  const [checkedPagado, setCheckedPagado] = useState(false);
 
-  //TODO ESTO SACARLO
-  const [groupList, setGroupList] = useState([]);
-  const [currentGroup, setCurrentGroup] = useState('');
+  const [groupList, setGroupList] = useState<GroupRequest[]>([]);
+  const [currentGroup, setCurrentGroup] = useState<number>();
   const [showDropDownGroups, setShowDropDownGroups] = useState(false);
   useEffect(() => {
-    // const loadGroups = async () => {
-    //   try {
-    //     const storedGroups = await AsyncStorage.getItem('groups');
-    //     if (storedGroups) {
-    //       const groups = JSON.parse(storedGroups);
-    //       const groupItems = groups.map((group: any) => ({
-    //         label: group.nombre, // Ajusta según la estructura de tu grupo
-    //         value: group.id, // Ajusta según la estructura de tu grupo
-    //       }));
-    //       setGroupList(groupItems);
-    //     }
-    //   } catch (error) {
-    //     console.error('Error loading groups:', error);
-    //   }
-    // };
-
-    // loadGroups();
+    const loadGroups = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const myGroups = await getMyGroups(token);
+          setGroupList(myGroups);
+        }
+      } catch (error) {
+        console.error('Error loading groups:', error);
+      }
+    };
+    loadGroups();
 
     const loadCategories = async () => {
       const token = await AsyncStorage.getItem('token');
@@ -87,41 +98,51 @@ export const ExpensesScreen = () => {
       }
     };
     loadCategories();
+
+    const loadTags = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const tags = await getMyTags(token);
+        setTagList(tags);
+      }
+    };
+    loadTags();
   }, []);
 
   const addExpense = async () => {
     try {
-      if (currentGroup) {
-        const storedGroupExpenses = await AsyncStorage.getItem('groupExpenses');
-        const groupExpenses = storedGroupExpenses
-          ? JSON.parse(storedGroupExpenses)
-          : {};
-        if (!groupExpenses[currentGroup]) {
-          groupExpenses[currentGroup] = [];
+      const typeExpense = checked ? 'fijo' : 'casual';
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        if (currentGroup) {
+          await postExpenseGrupal(expense, token, typeExpense, currentGroup);
+        } else {
+          if (typeExpense === 'fijo') {
+            const newExpense = {
+              nombre: expense.nombre,
+              descripcion: expense.descripcion,
+              monto: expense.monto,
+              fecha: expense.fecha,
+              id_categoria: expense.id_categoria,
+              tags: expense.tags,
+              saldado: expense.saldado,
+              frecuencia: 'mensualmente',
+            };
+            await postExpensePersonal(newExpense, token, typeExpense);
+          } else {
+            await postExpensePersonal(expense, token, typeExpense);
+          }
         }
-        groupExpenses[currentGroup].push(expense);
-        await AsyncStorage.setItem(
-          'groupExpenses',
-          JSON.stringify(groupExpenses),
-        );
-      } else {
-        const storedExpenses = await AsyncStorage.getItem('expenses');
-        const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
-        expenses.push(expense);
-        await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
       }
 
       setExpense({
-        id: Date.now() * Math.floor(Math.random() * 100) + 10,
-        name: '',
-        description: '',
-        amount: 0,
-        expirationDate: undefined,
-        category: '',
-        isFixed: checked,
-        tag: '',
-        date: new Date(),
-        group: '',
+        nombre: '',
+        descripcion: '',
+        monto: 0,
+        fecha: '19/06/2024',
+        id_categoria: 0,
+        tags: [],
+        saldado: false,
       });
       showToastSuccess('Gasto añadido!', '');
     } catch (error) {
@@ -136,20 +157,27 @@ export const ExpensesScreen = () => {
       return;
     }
 
-    const newTagItem = {
+    /* const newTagItem = {
       label: newTag,
       value: newTag.toLowerCase(),
-    };
+    }; */
 
     try {
-      const storedTags = await AsyncStorage.getItem('tags');
-      const tags = storedTags ? JSON.parse(storedTags) : [];
-      const updatedTags = [...tags, newTagItem];
-      await AsyncStorage.setItem('tags', JSON.stringify(updatedTags));
-      setTagList(prevTag => [...prevTag, newTagItem]);
-      setNewTag('');
-      hideModalFinished();
-      showToastSuccess('Tag añadido!', '');
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const newTagReq = {
+          nombre: newTag,
+          descripcion: '',
+          color: '',
+        };
+        const resultTags = await postTag(newTagReq, token);
+        /* newTagReq.id_grupo = currentGroup ? currentGroup : undefined; */
+
+        setTagList(prevTag => [...prevTag, resultTags as unknown as Tag]);
+        setNewTag('');
+        hideModalFinished();
+        showToastSuccess('Tag añadido!', '');
+      }
     } catch (error) {
       showToastError('Error', 'No se pudo agregar el tag');
       console.error('Error saving tag:', error);
@@ -158,10 +186,7 @@ export const ExpensesScreen = () => {
 
   const removeTag = async () => {
     try {
-      const storedTags = await AsyncStorage.getItem('tags');
-      let tags = storedTags ? JSON.parse(storedTags) : [];
-      tags = tags.filter((tag: any) => !selectedTags.includes(tag.value));
-      await AsyncStorage.setItem('tags', JSON.stringify(tags));
+      let tags = tagList.filter(tag => !selectedTags.includes(tag));
       setTagList(tags);
       setSelectedTags([]);
       hideModalRemove();
@@ -182,44 +207,69 @@ export const ExpensesScreen = () => {
     });
   };
 
-  useEffect(() => {
-    const loadTags = async () => {
-      try {
-        const storedTags = await AsyncStorage.getItem('tags');
-        if (storedTags) {
-          setTagList(JSON.parse(storedTags));
+  const loadTags = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        if (currentGroup) {
+          const storedTags = await getMyTagsGroups(token, currentGroup);
+          if (storedTags !== undefined) {
+            setTagList(storedTags);
+          }
+        } else {
+          const storedTags = await getMyTags(token);
+          if (storedTags !== undefined) {
+            setTagList(storedTags);
+          }
         }
-      } catch (error) {
-        console.error('Error loading tags:', error);
       }
-    };
-
-    loadTags();
-  }, []);
+    } catch (error) {
+      console.error('Error loading tags:', error);
+    }
+  };
 
   useEffect(() => {
-    setExpense({...expense, category: currentCategory});
+    setExpense({...expense, id_categoria: parseInt(currentCategory)});
     const c = categoriesList.find(obj => obj.nombre === currentCategory);
     if (c) {
       setCategotySelected(c);
+      setExpense({...expense, id_categoria: c.id});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCategory]);
 
-  useEffect(() => {
-    setExpense({...expense, tag: currentTag});
+  /*  useEffect(() => {
+    setExpense({...expense, tags: currentTag});
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTag]);
+  }, [currentTag]); */
+  function formatDateToDDMMYYYY(date: Date): string {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
   useEffect(() => {
-    setExpense({...expense, date: date});
+    const fechaFormateada = formatDateToDDMMYYYY(date);
+    setExpense({...expense, fecha: fechaFormateada});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   useEffect(() => {
-    setExpense({...expense, group: currentGroup});
+    loadTags();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentGroup]);
+
+  useEffect(() => {
+    setExpense({...expense, tags: [Number(currentTag)]});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTags, currentTag]);
+
+  useEffect(() => {
+    console.log('currentTag: ', currentTag);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTag]);
 
   return (
     <View style={styleListExpenses.container}>
@@ -234,8 +284,8 @@ export const ExpensesScreen = () => {
             </Text>
             <TextInput
               placeholder="Nombre"
-              value={expense.name}
-              onChangeText={text => setExpense({...expense, name: text})}
+              value={expense.nombre}
+              onChangeText={text => setExpense({...expense, nombre: text})}
               style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -247,8 +297,8 @@ export const ExpensesScreen = () => {
             </Text>
             <TextInput
               placeholder="Descripción"
-              value={expense.description}
-              onChangeText={text => setExpense({...expense, description: text})}
+              value={expense.descripcion}
+              onChangeText={text => setExpense({...expense, descripcion: text})}
               style={styleListExpenses.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
@@ -260,9 +310,9 @@ export const ExpensesScreen = () => {
             </Text>
             <TextInput
               placeholder="Monto"
-              value={expense.amount.toString()}
+              value={expense.monto.toString()}
               onChangeText={text =>
-                setExpense({...expense, amount: Number(text)})
+                setExpense({...expense, monto: Number(text)})
               }
               keyboardType="numeric"
               style={styleListExpenses.inputButtons}
@@ -337,36 +387,58 @@ export const ExpensesScreen = () => {
               onDismiss={() => setShowDropDownGroups(false)}
               value={currentGroup}
               setValue={setCurrentGroup}
-              list={groupList}
+              list={groupList.map(gr => ({
+                label: gr.nombre,
+                value: gr.id,
+              }))}
             />
           </View>
+          {currentGroup && (
+            <View style={styleListExpenses.inputContainer}>
+              <DropDown
+                label={'Frecuencia'}
+                mode={'outlined'}
+                visible={showDropDownFrequency}
+                showDropDown={() => setShowDropDownFrequency(true)}
+                onDismiss={() => setShowDropDownFrequency(false)}
+                value={frequency}
+                setValue={setFrequency}
+                list={frequencyOptions}
+              />
+            </View>
+          )}
         </View>
         <View style={styleListExpenses.inputContainer}>
           <View style={styleListExpenses.inputContainer}>
             <Text variant="headlineSmall" style={styleListExpenses.inputTitle}>
               Tags
             </Text>
-            <DropDown
-              mode={'outlined'}
-              placeholder="Tags"
-              visible={showDropDownTags}
-              showDropDown={() => setShowDropDownTags(true)}
-              onDismiss={() => setShowDropDownTags(false)}
-              value={currentTag}
-              setValue={setCurrentTag}
-              list={tagList}
-              dropDownStyle={styleListExpenses.dropDownStyle}
-              dropDownItemSelectedStyle={
-                styleListExpenses.dropDownItemSelectedStyle
-              }
-              dropDownItemStyle={styleListExpenses.dropDownItemStyle}
-              dropDownItemTextStyle={styleListExpenses.dropDownItemTextStyle}
-              activeColor={globalColors.background}
-              inputProps={[
-                styleListExpenses.inputButtons,
-                styleListExpenses.dropdown,
-              ]}
-            />
+            {tagList && tagList.length > 0 && (
+              <DropDown
+                mode={'outlined'}
+                placeholder="Tags"
+                visible={showDropDownTags}
+                showDropDown={() => setShowDropDownTags(true)}
+                onDismiss={() => setShowDropDownTags(false)}
+                value={currentTag}
+                setValue={setCurrentTag}
+                list={tagList.map(c => ({
+                  label: c.nombre.toUpperCase(),
+                  value: c.id,
+                }))}
+                dropDownStyle={styleListExpenses.dropDownStyle}
+                dropDownItemSelectedStyle={
+                  styleListExpenses.dropDownItemSelectedStyle
+                }
+                dropDownItemStyle={styleListExpenses.dropDownItemStyle}
+                dropDownItemTextStyle={styleListExpenses.dropDownItemTextStyle}
+                activeColor={globalColors.background}
+                inputProps={[
+                  styleListExpenses.inputButtons,
+                  styleListExpenses.dropdown,
+                ]}
+              />
+            )}
           </View>
           <View style={styleListExpenses.inputRowContainer}>
             <Pressable
@@ -418,7 +490,28 @@ export const ExpensesScreen = () => {
               color={globalColors.background}
               onPress={() => {
                 setChecked(!checked);
-                setExpense({...expense, isFixed: !checked});
+              }}
+            />
+          </View>
+          <View
+            style={[
+              styleListExpenses.fixedExpense,
+              checked === false && styleListExpenses.notCheckedButtom,
+            ]}>
+            <Text
+              variant="titleMedium"
+              style={[
+                styleListExpenses.addCategoriesButtonText,
+                checkedPagado === false && styleListExpenses.notCheckedText,
+              ]}>
+              Pagado
+            </Text>
+            <Checkbox
+              status={checkedPagado ? 'checked' : 'unchecked'}
+              color={globalColors.background}
+              onPress={() => {
+                setCheckedPagado(!checkedPagado);
+                setExpense({...expense, saldado: !checkedPagado});
               }}
             />
           </View>
@@ -477,19 +570,17 @@ export const ExpensesScreen = () => {
             </Text>
             <FlatList
               data={tagList}
-              keyExtractor={item => item.value}
+              keyExtractor={item => item.id.toString()}
               renderItem={({item}) => (
                 <View style={styleListExpenses.categoryItem}>
                   <Checkbox
                     status={
-                      selectedTags.includes(item.value)
-                        ? 'checked'
-                        : 'unchecked'
+                      selectedTags.includes(item) ? 'checked' : 'unchecked'
                     }
-                    onPress={() => toggleTagSelection(item.value)}
+                    onPress={() => toggleTagSelection(item.id.toString())}
                   />
                   <Text style={styleListExpenses.categoryItemText}>
-                    {item.label}
+                    {item.nombre}
                   </Text>
                 </View>
               )}

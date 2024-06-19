@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export const getCategorias = async (token: string) => {
   try {
-    const response = await axios.get(`http://192.168.1.47:3000/api/categorias`, {
+    const response = await axios.get(`https://backenddycgestion-production.up.railway.app/api/categorias`, {
       headers: {
         token: token,
       },

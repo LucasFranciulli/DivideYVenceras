@@ -1,6 +1,6 @@
 
 export interface Group {
-  id?: number;
+  id: number;
   descripcion: string,
   nombre: string;
   color: string;

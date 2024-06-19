@@ -1,17 +1,45 @@
 import axios from 'axios';
-import { Tag } from '../../../utils/Tag';
-import { ApiResponse } from '../../../utils/ApiResponse';
+import {Tag} from '../../../utils/Tag';
+import {ApiResponse} from '../../../utils/ApiResponse';
 
-const postTag = async (newTag: Tag, token: string) => {
-    const response = await axios.post<ApiResponse>(
-        'http://192.168.1.47:3000/api/tags',
-        newTag,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'token': token
-          },
-        }
-    );
-    return response.data;
-}
+export const postTag = async (newTag: any, token: string) => {
+  const response = await axios.post<ApiResponse>(
+    'https://backenddycgestion-production.up.railway.app/api/tags',
+    newTag,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        token: token,
+      },
+    },
+  );
+  return response.data;
+};
+
+export const getMyTags = async (token: string) => {
+  const response = await axios.get(
+    'https://backenddycgestion-production.up.railway.app/api/tags/mios',
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        token: token,
+      },
+    },
+  );
+  const tags: Tag[] = response.data;
+  return tags;
+};
+
+export const getMyTagsGroups = async (token: string, idGrupo: number) => {
+  const response = await axios.get(
+    `https://backenddycgestion-production.up.railway.app/api/tags/grupo/${idGrupo}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        token: token,
+      },
+    },
+  );
+  const tags: Tag[] = response.data.tags;
+  return tags;
+};

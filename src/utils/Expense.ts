@@ -4,8 +4,8 @@ export interface Expense {
   descripcion: string;
   monto: string;
   monto_pagado: string;
-  tipo: string;
-  liquidacion: string;
+  tipo: "FIJO" | "CASUAL";
+  liquidacion: "EFECTIVO";
   fecha: Date;
   id_categoria: number;
   id_grupo: number | null;

@@ -11,12 +11,20 @@ import {styles} from './style';
 import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 import PersonalExpensesScreen from './PersonalExpensesScreen';
 import GroupExpensesScreen from './GroupExpensesScreen';
-import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
 import * as service from './services/expenses';
 import {parsePersonalResults} from '../../utils/parsePersonalExpenses';
 import {parseGroupResults} from '../../utils/parseGroupExpenses';
 import {globalColors} from '../../themes/theme';
 import {Filters} from '../../components/filters/Filters';
+import {
+  SceneMap,
+  SceneRendererProps,
+  TabBar,
+  TabView,
+} from 'react-native-tab-view';
+import {getPersonalExpenses} from './services/personalExpenses';
+import {getgrupalExpenses} from './services/grupalExpenses';
+import {deleteExpenseBD} from './services/deleteExpenses';
 
 export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -26,8 +34,12 @@ export type EditExpensesScreenNavigationProp = NativeStackNavigationProp<
 export const ProfileScreen = () => {
   const [personalExpenses, setPersonalExpenses] = useState<Expense[]>([]);
   const [groupExpenses, setGroupExpenses] = useState<Expense[]>([]);
-  const [personalExpensesFiltered, setPersonalExpensesFiltered] = useState<Expense[]>([]);
-  const [groupExpensesFiltered, setGroupExpensesFiltered] = useState<Expense[]>([]);
+  const [personalExpensesFiltered, setPersonalExpensesFiltered] = useState<
+    Expense[]
+  >([]);
+  const [groupExpensesFiltered, setGroupExpensesFiltered] = useState<Expense[]>(
+    [],
+  );
   const navigation = useNavigation<EditExpensesScreenNavigationProp>();
   const [filter, setFilter] = useState('week');
 
@@ -58,14 +70,6 @@ export const ProfileScreen = () => {
     setFilter(input);
   };
 
-  const msjError = (message: string) => {
-    showToastError('Error', message);
-  };
-
-  const msjSuccess = (message: string) => {
-    showToastSuccess(message, '');
-  };
-
   const renderScene = SceneMap({
     personal: () => (
       <PersonalExpensesScreen
@@ -94,6 +98,7 @@ export const ProfileScreen = () => {
           const responseGroups = await service.getGroupExpenses(token);
           const groupExpensesResponse = parseGroupResults(responseGroups);
           setGroupExpenses(groupExpensesResponse);
+          showToastSuccess('Gasto borrado con exito', '');
         }
       }
     } catch (error) {
