@@ -124,6 +124,32 @@ export const stylesViewGroup = StyleSheet.create({
   groupExpensesContainer: {
     padding: 20,
   },
+  divide: {
+    position: 'absolute',
+    backgroundColor: globalColors.primary,
+    bottom: 0,
+    alignSelf: 'center',
+    marginBottom: 10,
+    borderRadius: 40,
+    padding: 20,
+  },
+  finalDivision: {
+    flex: 1,
+    marginTop: 20,
+    paddingHorizontal: 16,
+  },
+  item: {
+    backgroundColor: globalColors.secondary,
+    padding: 20,
+    marginVertical: 8,
+    borderRadius: 8,
+  },
+  itemText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: globalColors.background,
+  },
 });
 
 export const stylesListGroups = StyleSheet.create({

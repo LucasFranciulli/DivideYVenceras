@@ -118,46 +118,61 @@ export const ProfileScreen = () => {
 
   const applyFilter = () => {
     const now = new Date();
-    let filteredPersonal: Expense[] = [];
-    let filteredGroup: Expense[] = [];
+    let filteredPersonal = [];
+    let filteredGroup = [];
     switch (filter) {
       case 'week':
-        filteredPersonal = personalExpenses.filter(expense => {
-          const expenseDate = new Date(expense.fecha);
-          return now - expenseDate <= 7 * 24 * 60 * 60 * 1000;
-        });
+        filteredPersonal = personalExpenses
+          .filter(expense => {
+            const expenseDate = new Date(expense.fecha);
+            return now - expenseDate <= 7 * 24 * 60 * 60 * 1000;
+          })
+          .map(expense => ({...expense}));
         setPersonalExpensesFiltered(filteredPersonal);
-        filteredGroup = groupExpenses.filter(expense => {
-          const expenseDate = new Date(expense.fecha);
-          return now - expenseDate <= 7 * 24 * 60 * 60 * 1000;
-        });
+        filteredGroup = groupExpenses
+          .filter(expense => {
+            const expenseDate = new Date(expense.fecha);
+            return now - expenseDate <= 7 * 24 * 60 * 60 * 1000;
+          })
+          .map(expense => ({...expense}));
         setGroupExpensesFiltered(filteredGroup);
         break;
       case 'month':
-        filteredPersonal = personalExpenses.filter(expense => {
-          const expenseDate = new Date(expense.fecha);
-          return now - expenseDate <= 30 * 24 * 60 * 60 * 1000;
-        });
+        filteredPersonal = personalExpenses
+          .filter(expense => {
+            const expenseDate = new Date(expense.fecha);
+            return now - expenseDate <= 30 * 24 * 60 * 60 * 1000;
+          })
+          .map(expense => ({...expense}));
         setPersonalExpensesFiltered(filteredPersonal);
-        filteredGroup = groupExpenses.filter(expense => {
-          const expenseDate = new Date(expense.fecha);
-          return now - expenseDate <= 30 * 24 * 60 * 60 * 1000;
-        });
+        filteredGroup = groupExpenses
+          .filter(expense => {
+            const expenseDate = new Date(expense.fecha);
+            return now - expenseDate <= 30 * 24 * 60 * 60 * 1000;
+          })
+          .map(expense => ({...expense}));
         setGroupExpensesFiltered(filteredGroup);
         break;
       case 'year':
-        filteredPersonal = personalExpenses.filter(expense => {
-          const expenseDate = new Date(expense.fecha);
-          return now - expenseDate <= 365 * 24 * 60 * 60 * 1000;
-        });
+        filteredPersonal = personalExpenses
+          .filter(expense => {
+            const expenseDate = new Date(expense.fecha);
+            return now - expenseDate <= 365 * 24 * 60 * 60 * 1000;
+          })
+          .map(expense => ({...expense}));
         setPersonalExpensesFiltered(filteredPersonal);
-        filteredGroup = groupExpenses.filter(expense => {
-          const expenseDate = new Date(expense.fecha);
-          return now - expenseDate <= 365 * 24 * 60 * 60 * 1000;
-        });
+        filteredGroup = groupExpenses
+          .filter(expense => {
+            const expenseDate = new Date(expense.fecha);
+            return now - expenseDate <= 365 * 24 * 60 * 60 * 1000;
+          })
+          .map(expense => ({...expense}));
         setGroupExpensesFiltered(filteredGroup);
         break;
     }
+
+    console.log('personalExpenses: ', personalExpenses);
+    console.log('filteredPersonal: ', filteredPersonal);
   };
 
   return (

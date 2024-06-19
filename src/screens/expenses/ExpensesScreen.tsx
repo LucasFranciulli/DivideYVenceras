@@ -66,7 +66,7 @@ export const ExpensesScreen = () => {
     descripcion: '',
     monto: 0,
     fecha: '19/06/2024',
-    id_categoria: 0,
+    id_categoria: 1,
     tags: [],
     saldado: false,
   });
@@ -140,7 +140,7 @@ export const ExpensesScreen = () => {
         descripcion: '',
         monto: 0,
         fecha: '19/06/2024',
-        id_categoria: 0,
+        id_categoria: 1,
         tags: [],
         saldado: false,
       });

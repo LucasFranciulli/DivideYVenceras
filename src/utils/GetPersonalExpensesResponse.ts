@@ -12,3 +12,4 @@ export interface GetGroupExpensesResponse {
   currentPage: number;
   gastos: ExpensesGroupScheme[];
 }
+

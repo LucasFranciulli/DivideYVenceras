@@ -7,6 +7,7 @@ export const postExpenseGrupal = async (
   type: string,
   id: number | string,
 ): Promise<string> => {
+
   const newExpense = {
     nombre: expense.nombre,
     descripcion: expense.descripcion,

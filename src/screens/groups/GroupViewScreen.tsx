@@ -14,6 +14,9 @@ import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 import {getGroupById} from './services/group';
 import {GrupoByID, UsuarioByIdGroups} from '../../utils/GroupById';
 import Clipboard from '@react-native-clipboard/clipboard';
+import * as service from '../profile/services/expenses';
+import {parseGroupResults} from '../../utils/parseGroupExpenses';
+import {Transaccion} from '../../utils/DivideExpenses';
 
 type GroupViewScreenRouteProp = RouteProp<RootStackParamList, 'GroupView'>;
 
@@ -24,6 +27,8 @@ export const GroupViewScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [users, setUsers] = useState<UsuarioByIdGroups[]>([]);
+
+  const [finalDivision, setFinalDivision] = useState<Transaccion[]>([]);
 
   const [notShowUsers, setNotShowUsers] = useState(true);
   const handlenotShowUsers = () => {
@@ -46,18 +51,14 @@ export const GroupViewScreen = () => {
   useEffect(() => {
     const loadGroupExpenses = async () => {
       try {
-        const storedGroupExpenses = await AsyncStorage.getItem('groupExpenses');
-        if (storedGroupExpenses) {
-          const parsedExpenses = JSON.parse(storedGroupExpenses);
-          if (parsedExpenses && typeof parsedExpenses === 'object') {
-            const currentGroupExpenses = parsedExpenses[group.id] || [];
-            setGroupExpenses(currentGroupExpenses);
-          } else {
-            console.error(
-              'Stored expenses data is not a valid object:',
-              parsedExpenses,
-            );
-          }
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const responseGroups = await service.getGroupExpenses(token);
+          const groupExpensesResponse = parseGroupResults(responseGroups);
+          const filteredGroupExpenses = groupExpensesResponse.filter(
+            expense => expense.id_grupo === group.id,
+          );
+          setGroupExpenses(filteredGroupExpenses);
         }
       } catch (error) {
         console.error('Error loading group expenses:', error);
@@ -65,7 +66,7 @@ export const GroupViewScreen = () => {
     };
 
     loadGroupExpenses();
-  }, [group.id]);
+  }, []);
 
   const renderUserItem = ({item}: any) => (
     <View style={stylesViewGroup.userItem}>
@@ -107,6 +108,31 @@ export const GroupViewScreen = () => {
       showToastError={msjError}
       navigation={navigation}
     />
+  );
+
+  const handleDivide = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const responseGroups: Transaccion[] = await service.divideGroupExpenses(
+          group.id,
+          token,
+        );
+        console.log('responseGroups: ', responseGroups);
+        responseGroups !== undefined && setFinalDivision(responseGroups);
+      }
+    } catch (error) {
+      console.error('Error loading group expenses:', error);
+    }
+  };
+
+  const renderItem = ({item}: {item: Transaccion}) => (
+    <View style={stylesViewGroup.item}>
+      <Text style={stylesViewGroup.itemText}>
+        {item.from} le tiene que pagar ${item.amount}
+      </Text>
+      <Text style={stylesViewGroup.itemText}>a {item.to}</Text>
+    </View>
   );
 
   return (
@@ -182,13 +208,29 @@ export const GroupViewScreen = () => {
         )}
       </View>
       <Divider />
-      {groupExpenses.length > 0 ? (
+      {finalDivision && finalDivision.length > 0 ? (
         <FlatList
-          data={groupExpenses}
-          renderItem={renderExpenseItem}
-          style={stylesViewGroup.groupExpensesContainer}
-          keyExtractor={item => item.id.toString()}
+          data={finalDivision}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          style={stylesViewGroup.finalDivision}
         />
+      ) : groupExpenses.length > 0 ? (
+        <>
+          <FlatList
+            data={groupExpenses}
+            renderItem={renderExpenseItem}
+            style={stylesViewGroup.groupExpensesContainer}
+            keyExtractor={item => item.id.toString()}
+          />
+          <Pressable style={stylesViewGroup.divide} onPress={handleDivide}>
+            <Text
+              variant="headlineLarge"
+              style={{color: globalColors.background}}>
+              Dividir gastos
+            </Text>
+          </Pressable>
+        </>
       ) : (
         <Text style={stylesViewGroup.noGroupText}>
           No hay gastos en este grupo

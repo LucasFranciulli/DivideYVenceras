@@ -3,6 +3,8 @@ import {
   GetGroupExpensesResponse,
   GetPersonalExpensesResponse,
 } from '../../../utils/GetPersonalExpensesResponse';
+import {TransaccionesResponse} from '../../../utils/DivideExpenses';
+import {PayExpenseResponse} from '../../../utils/PayExpense';
 
 const formatDate = (date: Date): string => {
   const day = date.getDate().toString().padStart(2, '0');
@@ -64,5 +66,41 @@ export const deleteExpense = async (token: string, id: number) => {
   } catch (error: any) {
     console.log('error: ', error);
     return false;
+  }
+};
+
+export const divideGroupExpenses = async (id: number, token: string) => {
+  try {
+    const result = await axios.post<TransaccionesResponse>(
+      `${URL}/api/grupos/${id}/dividir`,
+      {},
+      {
+        headers: {
+          token: token,
+        },
+      },
+    );
+    console.log('result: ', result.data);
+    return result.data.transacciones;
+  } catch (error: any) {
+    console.log('error: ', error);
+  }
+};
+
+export const payExpense = async (id: number, token: string) => {
+  try {
+    const result = await axios.post<PayExpenseResponse>(
+      `${URL}/api/gastos/pagar/${id}`,
+      {},
+      {
+        headers: {
+          token: token,
+        },
+      },
+    );
+    console.log('PAY result: ', result.data);
+    return result.data;
+  } catch (error: any) {
+    console.log('error: ', error);
   }
 };

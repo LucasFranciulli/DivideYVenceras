@@ -6,6 +6,8 @@ import {globalColors} from '../../themes/theme';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {EditExpensesScreenNavigationProp} from '../../screens/profile/ProfileScreen';
 import {showToastError, showToastSuccess} from '../../utils/ToastActions';
+import {payExpense} from '../../screens/profile/services/expenses';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   item: Expense;
@@ -16,7 +18,6 @@ interface Props {
 export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
   const [visible, setVisible] = useState(false);
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
-
 
   const formatDate = (date: Date) => {
     const d = new Date(date);
@@ -43,11 +44,28 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
     }
   };
 
+  const handlePay = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      console.log('ID A pagar: ', item.id);
+      if (token) {
+        await payExpense(item.id, token);
+        showToastSuccess('Gasto Pagado!', '');
+      }
+    } catch (err) {
+      console.log(err);
+      showToastError('Error', 'Hubo un problema al pagar');
+    }
+    hideModalFinished();
+  };
+
   return (
     <View
       style={[
         styles.itemContainer,
-        item.tipo === "FIJO" ? styles.backgroundFixed : styles.backgroundNotFixed,
+        item.tipo === 'FIJO'
+          ? styles.backgroundFixed
+          : styles.backgroundNotFixed,
       ]}>
       <View style={styles.itemDataContainer}>
         <View style={{gap: 10, width: '80%'}}>
@@ -60,7 +78,9 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
               <Text
                 variant="headlineMedium"
                 style={
-                  item.tipo === "FIJO" ? styles.nameTextFixed : styles.nameTitleText
+                  item.tipo === 'FIJO'
+                    ? styles.nameTextFixed
+                    : styles.nameTitleText
                 }>
                 {item.nombre}
               </Text>
@@ -70,9 +90,10 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
                 <Text
                   variant="titleLarge"
                   style={{
-                    color: item.tipo === "FIJO"
-                      ? globalColors.background
-                      : globalColors.grey,
+                    color:
+                      item.tipo === 'FIJO'
+                        ? globalColors.background
+                        : globalColors.grey,
                   }}>
                   {fecha}
                 </Text>
@@ -82,8 +103,11 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
           <View style={styles.itemDataRowContainer}>
             <Text
               variant="titleLarge"
-              style={item.tipo === "FIJO" ? styles.nameTextFixed : styles.nameText}>
+              style={
+                item.tipo === 'FIJO' ? styles.nameTextFixed : styles.nameText
+              }>
               {item.descripcion}
+              {item.id}
             </Text>
           </View>
           <View style={{flexDirection: 'row', gap: 20}}>
@@ -94,15 +118,17 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
                 </Text>
               </View>
             )}
-          {item.tags && item.tags.length > 0 && (
-            item.tags.map((tag, index) => (
-              <View key={index} style={[styles.itemDataRowContainer, styles.tag]}>
-                <Text variant="titleMedium" style={styles.nameText}>
-                  {tag.nombre}
-                </Text>
-              </View>
-            ))
-          )}
+            {item.tags &&
+              item.tags.length > 0 &&
+              item.tags.map((tag, index) => (
+                <View
+                  key={index}
+                  style={[styles.itemDataRowContainer, styles.tag]}>
+                  <Text variant="titleMedium" style={styles.nameText}>
+                    {tag.nombre}
+                  </Text>
+                </View>
+              ))}
           </View>
         </View>
         <Menu
@@ -135,9 +161,12 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
         </Menu>
       </View>
       <Button
-        style={item.tipo === "FIJO" ? styles.buttonFixed : styles.button}
-        textColor={item.tipo === "FIJO" ? globalColors.dark : globalColors.background}
-        onPress={showModalFinished}>
+        style={item.tipo === 'FIJO' ? styles.buttonFixed : styles.button}
+        textColor={
+          item.tipo === 'FIJO' ? globalColors.dark : globalColors.background
+        }
+        onPress={showModalFinished}
+        disabled={item.liquidacion === 'PAGADO'}>
         $ {item.monto}
       </Button>
       <Portal>
@@ -153,7 +182,7 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
               ¿Desea completar el pago de este gasto?
             </Text>
             <View style={styles.buttomModalButtons}>
-              <Button onPress={() => deleteExpense(item.id)}>
+              <Button onPress={handlePay}>
                 <Text variant="titleMedium" style={styles.nameTitleModal}>
                   Confirmar
                 </Text>

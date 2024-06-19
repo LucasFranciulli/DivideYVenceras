@@ -28,6 +28,8 @@ const PersonalExpensesScreen = ({ expenses, deleteExpense }: Props) => {
     />
     );
 
+    console.log("expenses DENTRO: ", expenses);
+
     return (
     <View style={{ flex: 1 }}>
         {expenses.length === 0 ? (

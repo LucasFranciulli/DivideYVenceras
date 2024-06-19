@@ -3,6 +3,7 @@ import { Expense } from "./Expense";
 export const parsePersonalResults = (response: any): Expense[] => {
   const {gastos} = response;
 
+
   return gastos.map((gasto: any) => ({
     id: gasto.id,
     nombre: gasto.nombre,
