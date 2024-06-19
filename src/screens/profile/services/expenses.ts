@@ -19,10 +19,7 @@ export const getPersonalExpenses = async (token: string) => {
   oneYearAgo.setFullYear(now.getFullYear() - 1);
 
   const currentDateFormatted = formatDate(now);
-  console.log("currentDateFormatted", currentDateFormatted);
   const oneYearAgoFormatted = formatDate(oneYearAgo);
-  console.log("oneYearAgoFormatted", oneYearAgoFormatted);
-  console.log(`${URL}/api/gastos/propios?inicio=${oneYearAgoFormatted}&fin=${currentDateFormatted}`);
   try {
     const response = await axios.get<GetPersonalExpensesResponse>(
       `${URL}/api/gastos/propios?inicio=${oneYearAgoFormatted}&fin=${currentDateFormatted}`,
@@ -32,7 +29,6 @@ export const getPersonalExpenses = async (token: string) => {
         },
       },
     );
-    console.log("response.data ACA DEVUELVE", response.data);
     return response.data;
   } catch (error: any) {
     console.log('error: ', error);
