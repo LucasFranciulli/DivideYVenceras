@@ -187,7 +187,7 @@ export const ActivityScreen = () => {
               absolute
             />
           </View>
-          <View style={styles.chartContainer}>
+          { getTagsData().length > 0 &&  <View style={styles.chartContainer}>
             <Text variant="headlineSmall" style={styles.chartTitle}>
               Gastos por Tags
             </Text>
@@ -201,7 +201,7 @@ export const ActivityScreen = () => {
               paddingLeft="15"
               absolute
             />
-          </View>
+          </View>}
           <View style={styles.chartContainer}>
             <Text variant="headlineSmall" style={styles.chartTitle}>
               Suma Total de Gastos
