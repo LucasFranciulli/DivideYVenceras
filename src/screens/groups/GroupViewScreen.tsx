@@ -9,8 +9,11 @@ import {User} from '../../utils/User';
 import {globalColors} from '../../themes/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Expense} from '../../utils/Expense';
-import { ExpenseCard } from '../../components/expense/ExpenseCard';
-import { showToastError, showToastSuccess } from '../../utils/ToastActions';
+import {ExpenseCard} from '../../components/expense/ExpenseCard';
+import {showToastError, showToastSuccess} from '../../utils/ToastActions';
+import {getGroupById} from './services/group';
+import {GrupoByID, UsuarioByIdGroups} from '../../utils/GroupById';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 type GroupViewScreenRouteProp = RouteProp<RootStackParamList, 'GroupView'>;
 
@@ -20,7 +23,7 @@ export const GroupViewScreen = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newUserName, setNewUserName] = useState('');
-  const [users, setUsers] = useState<User[]>(group.usuarios);
+  const [users, setUsers] = useState<UsuarioByIdGroups[]>([]);
 
   const [notShowUsers, setNotShowUsers] = useState(true);
   const handlenotShowUsers = () => {
@@ -28,6 +31,17 @@ export const GroupViewScreen = () => {
   };
 
   const [groupExpenses, setGroupExpenses] = useState<Expense[]>([]);
+
+  const handleGetGroupById = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      const groupByIdData: GrupoByID = await getGroupById(group.id, token);
+      setUsers(groupByIdData.usuarios);
+    }
+  };
+  useEffect(() => {
+    handleGetGroupById();
+  }, []);
 
   useEffect(() => {
     const loadGroupExpenses = async () => {
@@ -53,30 +67,24 @@ export const GroupViewScreen = () => {
     loadGroupExpenses();
   }, [group.id]);
 
-  const addUser = async () => {
-    if (newUserName.trim()) {
-      const newUser = {id: users.length + 1, nombre: newUserName};
-      const updatedUsers = [...users, newUser];
-      setUsers(updatedUsers);
-      setNewUserName('');
-      setModalVisible(false);
-
-      // Update users in AsyncStorage
-      await updateGroupUsers(group.id, updatedUsers);
-    }
-  };
-
   const renderUserItem = ({item}: any) => (
     <View style={stylesViewGroup.userItem}>
       <Text style={stylesViewGroup.userItemBullet}>•</Text>
-      <Text style={stylesViewGroup.userItemText}>{item.nombre}</Text>
+      <Text style={stylesViewGroup.userItemText}>
+        {item.nombre} {item.apellido}
+      </Text>
     </View>
   );
 
   const deleteExpense = async (id: number) => {
     try {
-      const filteredExpenses = groupExpenses.filter(expense => expense.id !== id);
-      await AsyncStorage.setItem('groupExpenses', JSON.stringify(filteredExpenses));
+      const filteredExpenses = groupExpenses.filter(
+        expense => expense.id !== id,
+      );
+      await AsyncStorage.setItem(
+        'groupExpenses',
+        JSON.stringify(filteredExpenses),
+      );
       setGroupExpenses(filteredExpenses);
     } catch (error) {
       console.error('Error deleting expense:', error);
@@ -104,21 +112,9 @@ export const GroupViewScreen = () => {
   return (
     <View style={stylesViewGroup.container}>
       <View style={stylesViewGroup.header}>
-        <Text variant="displayMedium" style={stylesViewGroup.title}>
+        <Text variant="displaySmall" style={stylesViewGroup.title}>
           {group.nombre}
         </Text>
-        <Pressable
-          style={stylesViewGroup.addUsers}
-          onPress={() => setModalVisible(true)}>
-          <Text variant="titleMedium" style={stylesViewGroup.addButton}>
-            Agregar
-          </Text>
-          <Icon
-            name={'add-outline'}
-            size={25}
-            color={globalColors.background}
-          />
-        </Pressable>
         <Icon
           name={'log-out-outline'}
           size={40}
@@ -128,9 +124,33 @@ export const GroupViewScreen = () => {
           }}
         />
       </View>
-      <Text variant="titleLarge" style={stylesViewGroup.code}>
-        Código de grupo: {group.codigo}
-      </Text>
+      <Pressable
+        onPress={() => {
+          Clipboard.setString(group.token);
+        }}
+        style={{
+          backgroundColor: globalColors.backgroundHighlited,
+          flexDirection: 'column',
+          marginBottom: 10,
+          alignItems: 'center',
+          alignSelf: 'center',
+          width: '95%',
+          borderRadius: 10,
+        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <Text variant="titleMedium" style={stylesViewGroup.code}>
+            Código de grupo:
+          </Text>
+          <Icon name={'copy'} size={20} color={globalColors.primary} />
+        </View>
+        <Text variant="titleMedium" style={stylesViewGroup.code}>
+          {group.token}
+        </Text>
+      </Pressable>
       <View style={stylesViewGroup.usersList}>
         <View style={stylesViewGroup.userDropdown}>
           <Icon
@@ -162,38 +182,18 @@ export const GroupViewScreen = () => {
         )}
       </View>
       <Divider />
-        {groupExpenses.length > 0 ? (
-          <FlatList
-            data={groupExpenses}
-            renderItem={renderExpenseItem}
-            style={stylesViewGroup.groupExpensesContainer}
-            keyExtractor={item => item.id.toString()}
-          />
-        ) : (
-          <Text style={stylesViewGroup.noGroupText}>
-            No hay gastos en este grupo
-          </Text>
-        )}
-      <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
-        <View style={stylesViewGroup.modalContainer}>
-          <Text variant="titleLarge" style={{color: globalColors.primary}}>
-            ¿A quién deseas agregar?
-          </Text>
-          <TextInput
-            style={stylesViewGroup.input}
-            placeholder="Nombre del usuario"
-            value={newUserName}
-            onChangeText={setNewUserName}
-          />
-          <Pressable onPress={addUser} style={stylesViewGroup.addPressable}>
-            <Text
-              variant="titleMedium"
-              style={{color: globalColors.background}}>
-              Agregar usuario
-            </Text>
-          </Pressable>
-        </View>
-      </Modal>
+      {groupExpenses.length > 0 ? (
+        <FlatList
+          data={groupExpenses}
+          renderItem={renderExpenseItem}
+          style={stylesViewGroup.groupExpensesContainer}
+          keyExtractor={item => item.id.toString()}
+        />
+      ) : (
+        <Text style={stylesViewGroup.noGroupText}>
+          No hay gastos en este grupo
+        </Text>
+      )}
     </View>
   );
 };

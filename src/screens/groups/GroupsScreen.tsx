@@ -10,30 +10,15 @@ import {stylesListGroups} from './style';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../App';
-import { User } from '../../utils/User';
+import {User} from '../../utils/User';
+import {getMyGroups} from '../expenses/services/getMyGroups';
+import {createGroup, joinGroupByToken} from './services/group';
+import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 
 export type GroupsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'ListGroups'
 >;
-
-const generateUniqueCode = () => {
-  return Math.random().toString(36).substr(2, 8).toUpperCase();
-};
-
-const generateFakeGroups = () => {
-  const dummyGroup: Group = {
-    id: Date.now(),
-    nombre: 'Ejemplo',
-    color: 'blue',
-    limite_gasto: 1000,
-    monto_gastado: 500,
-    token: '12345678',
-    descripcion: ''
-  };
-
-  return dummyGroup;
-};
 
 export const GroupsScreen = () => {
   const [visibleModalFinished, setVisibleModalFinished] = useState(false);
@@ -44,8 +29,8 @@ export const GroupsScreen = () => {
     color: '',
     limite_gasto: 0,
     monto_gastado: 0,
-    token: generateUniqueCode(),
-    descripcion: ''
+    token: '',
+    descripcion: '',
   });
   const navigation = useNavigation<GroupsScreenNavigationProp>();
 
@@ -56,7 +41,6 @@ export const GroupsScreen = () => {
   const [visibleModalJoin, setVisibleModalJoin] = useState(false);
   const [joinGroupCode, setJoinGroupCode] = useState('');
   const [IdDelete, setIdDelete] = useState(0);
-  const [dummyGroups, setDummyGroups] = useState<Group[]>([]);
   const showModalDelete = () => setVisibleModalDelete(true);
   const hideModalDelete = () => setVisibleModalDelete(false);
 
@@ -65,36 +49,37 @@ export const GroupsScreen = () => {
 
   const fetchGroups = async () => {
     try {
-      const storedGroups = await AsyncStorage.getItem('groups');
-      if (storedGroups) {
-        setGroups(JSON.parse(storedGroups));
-      }
+      const token = await AsyncStorage.getItem('token');
 
-      const dummyGroup = generateFakeGroups();
-      const exists = dummyGroups.some(g => g.id === dummyGroup.id);
-      if (!exists) {
-        setDummyGroups([dummyGroup]);
+      if (token) {
+        const groupsFetched = await getMyGroups(token);
+        setGroups(groupsFetched);
       }
     } catch (error) {
       console.error('Error fetching groups:', error);
     }
   };
 
+  function getRandomHexColor(): string {
+    const randomColor = Math.floor(Math.random() * 16777215);
+    const hexColor = randomColor.toString(16).padStart(6, '0').toUpperCase();
+    return hexColor;
+  }
+
   const saveGroup = async () => {
     try {
-      const newGroup = {...group, codigo: generateUniqueCode()};
-      const newGroups = [...groups, newGroup];
-      await AsyncStorage.setItem('groups', JSON.stringify(newGroups));
-      setGroups(newGroups);
-      setGroup({
-        id: Date.now(),
-        nombre: '',
-        color: '',
-        limite_gasto: 0,
-        monto_gastado: 0,
-        usuarios: [],
-        codigo: generateUniqueCode(),
-      });
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        await createGroup(
+          group.nombre,
+          group.descripcion,
+          group.limite_gasto,
+          group.color,
+          token,
+        );
+      }
+      await fetchGroups();
+      showToastSuccess('Grupo creado!', '');
       hideModalFinished();
     } catch (error) {
       console.error('Error saving group:', error);
@@ -103,9 +88,9 @@ export const GroupsScreen = () => {
 
   const exitGroup = async (id: number) => {
     try {
-      const filteredGroups = groups.filter(g => g.id !== id);
-      await AsyncStorage.setItem('groups', JSON.stringify(filteredGroups));
-      setGroups(filteredGroups);
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+      }
     } catch (error) {
       console.error('Error deleting group:', error);
     }
@@ -113,17 +98,16 @@ export const GroupsScreen = () => {
 
   const joinGroup = async () => {
     try {
-      const dummyGroupIndex = dummyGroups.findIndex(g => g.codigo === joinGroupCode.toUpperCase());
-      if (dummyGroupIndex !== -1) {
-        // Agregar el grupo dummy a la lista de grupos
-        const joinedGroup = dummyGroups[dummyGroupIndex];
-        const updatedGroups = [...groups, joinedGroup];
-        await AsyncStorage.setItem('groups', JSON.stringify(updatedGroups));
-        setGroups(updatedGroups);
-        setJoinGroupCode('');
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const result = await joinGroupByToken(joinGroupCode, token);
         hideModalJoin();
-      } else {
-        console.error('Código de grupo incorrecto');
+        if (result) {
+          await fetchGroups();
+          showToastSuccess('Se unio al grupo!', '');
+        } else {
+          showToastError('Error al unirse al grupo', '');
+        }
       }
     } catch (error) {
       console.error('Error joining group:', error);
@@ -153,7 +137,7 @@ export const GroupsScreen = () => {
     <GroupCard
       id={item.id}
       name={item.nombre}
-      color={item.color}
+      color={`#${item.color}`}
       seeTheGroup={(id: number) => {
         setIdDelete(id);
         navigation.navigate('GroupView', {
@@ -234,13 +218,13 @@ export const GroupsScreen = () => {
               Color del grupo
             </Text>
             <View style={stylesListGroups.colors}>
-              {['red', 'blue', 'purple', 'green', 'yellow'].map(color => (
+              {['FF0000', '0000FF', '800080', '008000', 'FFFF00'].map(color => (
                 <Pressable
                   key={color}
                   onPress={() => setGroup({...group, color: color})}
                   style={[
                     stylesListGroups.colorCircle,
-                    {backgroundColor: color},
+                    {backgroundColor: `#${color}`},
                     group.color === color &&
                       stylesListGroups.selectedColorCircle,
                   ]}
@@ -316,7 +300,7 @@ export const GroupsScreen = () => {
             <TextInput
               placeholder="Código"
               value={joinGroupCode}
-              onChangeText={text => setJoinGroupCode(text.toUpperCase())}
+              onChangeText={text => setJoinGroupCode(text)}
               style={stylesListGroups.inputButtons}
               underlineColor="transparent"
               activeUnderlineColor="transparent"

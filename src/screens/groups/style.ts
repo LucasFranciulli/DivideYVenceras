@@ -10,10 +10,11 @@ export const stylesViewGroup = StyleSheet.create({
   title: {
     color: globalColors.primary,
     alignSelf: 'flex-start',
+    maxWidth: '60%',
   },
   code: {
     color: globalColors.primary,
-    padding: 20,
+    padding: 5,
   },
   header: {
     flexDirection: 'row',
