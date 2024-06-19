@@ -6,6 +6,9 @@ import {Expense} from '../../utils/Expense';
 import {PieChart, LineChart, BarChart} from 'react-native-chart-kit';
 import {chartConfig, styles} from './style';
 import {Filters} from '../../components/filters/Filters';
+import * as service from '../profile/services/expenses';
+import {parsePersonalResults} from '../../utils/parsePersonalExpenses';
+import {parseGroupResults} from '../../utils/parseGroupExpenses';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -17,12 +20,13 @@ export const ActivityScreen = () => {
 
   const fetchExpenses = async () => {
     try {
-      const storedExpenses = await AsyncStorage.getItem('expenses');
-      if (storedExpenses) {
-        console.log("storedExpenses", storedExpenses)
-        setExpenses(JSON.parse(storedExpenses));
-      } else {
-        setExpenses([]); // Si no hay gastos, establece un array vacío
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const response = await service.getPersonalExpenses(token);
+        const personalExpensesResponse = parsePersonalResults(response);
+        const responseGroups = await service.getGroupExpenses(token);
+        const groupExpensesResponse = parseGroupResults(responseGroups);
+        setExpenses([...personalExpensesResponse, ...groupExpensesResponse]);
       }
     } catch (error) {
       console.error('Error fetching expenses:', error);
@@ -47,19 +51,19 @@ export const ActivityScreen = () => {
     switch (filter) {
       case 'week':
         filtered = expenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
+          const expenseDate = new Date(expense.fecha);
           return now - expenseDate <= 7 * 24 * 60 * 60 * 1000;
         });
         break;
       case 'month':
         filtered = expenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
+          const expenseDate = new Date(expense.fecha);
           return now - expenseDate <= 30 * 24 * 60 * 60 * 1000;
         });
         break;
       case 'year':
         filtered = expenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
+          const expenseDate = new Date(expense.fecha);
           return now - expenseDate <= 365 * 24 * 60 * 60 * 1000;
         });
         break;
@@ -81,11 +85,11 @@ export const ActivityScreen = () => {
     const categoryMap: {[key: string]: number} = {};
 
     filteredExpenses.forEach(expense => {
-      if (expense.category) {
-        if (!categoryMap[expense.category]) {
-          categoryMap[expense.category] = 0;
+      if (expense.categoria) {
+        if (!categoryMap[expense.categoria.nombre]) {
+          categoryMap[expense.categoria.nombre] = 0;
         }
-        categoryMap[expense.category] += expense.amount;
+        categoryMap[expense.categoria.nombre] += Number(expense.monto);
       }
     });
 
@@ -102,12 +106,14 @@ export const ActivityScreen = () => {
     const TagMap: {[key: string]: number} = {};
 
     filteredExpenses.forEach(expense => {
-      if (expense.tag) {
-        if (!TagMap[expense.tag]) {
-          TagMap[expense.tag] = 0;
+      expense.tags?.forEach(tag => {
+        if (expense.tags) {
+          if (!TagMap[tag.nombre]) {
+            TagMap[tag.nombre] = 0;
+          }
+          TagMap[tag.nombre] += Number(expense.monto);
         }
-        TagMap[expense.tag] += expense.amount;
-      }
+      });
     });
 
     return Object.keys(TagMap).map(category => ({
@@ -122,7 +128,7 @@ export const ActivityScreen = () => {
   const getTotalAmountData = () => {
     let totalAmount = 0;
     const data = filteredExpenses.map(expense => {
-      totalAmount += expense.amount;
+      totalAmount += Number(expense.monto);
       return totalAmount;
     });
     return data;
@@ -130,11 +136,11 @@ export const ActivityScreen = () => {
 
   const getFixedVsNonFixedData = () => {
     const fixedTotal = filteredExpenses
-      .filter(expense => expense.isFixed)
-      .reduce((total, expense) => total + expense.amount, 0);
+      .filter(expense => expense.gastoFijo)
+      .reduce((total, expense) => total + Number(expense.monto), 0);
     const nonFixedTotal = filteredExpenses
-      .filter(expense => !expense.isFixed)
-      .reduce((total, expense) => total + expense.amount, 0);
+      .filter(expense => !expense.gastoFijo)
+      .reduce((total, expense) => total + Number(expense.monto), 0);
     return {
       labels: ['Gastos Fijos', 'Gastos No Fijos'],
       datasets: [
@@ -203,7 +209,7 @@ export const ActivityScreen = () => {
             <LineChart
               data={{
                 labels: filteredExpenses.map(expense =>
-                  new Date(expense.date).toLocaleDateString(),
+                  new Date(expense.fecha).toLocaleDateString(),
                 ),
                 datasets: [
                   {

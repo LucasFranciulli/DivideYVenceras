@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
       paddingTop: 20,
     },
     titleContainer: {
-      flexDirection: 'row',
+      flexDirection: 'column',
       justifyContent: 'space-between',
     },
     button: {
