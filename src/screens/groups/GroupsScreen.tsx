@@ -7,12 +7,12 @@ import {Group} from '../../utils/Group';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GroupCard from '../../components/groups/GroupCard';
 import {stylesListGroups} from './style';
-import {useNavigation} from '@react-navigation/native';
+import {NavigationHelpersContext, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../App';
 import {User} from '../../utils/User';
 import {getMyGroups} from '../expenses/services/getMyGroups';
-import {createGroup, joinGroupByToken} from './services/group';
+import {createGroup, joinGroupByToken, leaveGroup} from './services/group';
 import {showToastError, showToastSuccess} from '../../utils/ToastActions';
 
 export type GroupsScreenNavigationProp = NativeStackNavigationProp<
@@ -90,6 +90,9 @@ export const GroupsScreen = () => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
+        await leaveGroup(id, token);
+        /* navigation.goBack(); */
+        await fetchGroups();
       }
     } catch (error) {
       console.error('Error deleting group:', error);

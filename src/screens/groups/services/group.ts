@@ -37,15 +37,13 @@ export const createGroup = async (
       },
     },
   );
-  console.log('GRUPO CREAR: ', response);
 };
 
 export const joinGroupByToken = async (tokenGrupo: string, token: string) => {
-  console.log('tokenGrupo: ', tokenGrupo);
-  console.log('token: ', token);
   try {
     const response = await axios.post(
-      `https://backenddycgestion-production.up.railway.app/api/grupos/addIntegrante/${tokenGrupo}`, {},
+      `https://backenddycgestion-production.up.railway.app/api/grupos/addIntegrante/${tokenGrupo}`,
+      {},
       {
         headers: {
           'Content-Type': 'application/json',
@@ -53,8 +51,26 @@ export const joinGroupByToken = async (tokenGrupo: string, token: string) => {
         },
       },
     );
-    console.log('UNIRSE a Grupo: ', response);
-    return response.data.message === "Usuario agregado al grupo correctamente";
+    return response.data.message === 'Usuario agregado al grupo correctamente';
+  } catch (error: any) {
+    console.log('error: ', error);
+  }
+};
+
+export const leaveGroup = async (groupId: number, token: string) => {
+  try {
+    const response = await axios.post(
+      `https://backenddycgestion-production.up.railway.app/api/grupos/removeIntegrante/${groupId}`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          token: token,
+        },
+      },
+    );
+    console.log('salir de Grupo: ', response);
+    return response.data.message === 'Usuario agregado al grupo correctamente';
   } catch (error: any) {
     console.log('error: ', error);
   }
