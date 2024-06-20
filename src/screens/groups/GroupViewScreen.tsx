@@ -118,7 +118,6 @@ export const GroupViewScreen = () => {
           group.id,
           token,
         );
-        console.log('responseGroups: ', responseGroups);
         responseGroups !== undefined && setFinalDivision(responseGroups);
       }
     } catch (error) {

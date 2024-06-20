@@ -47,7 +47,6 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
   const handlePay = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      console.log('ID A pagar: ', item.id);
       if (token) {
         await payExpense(item.id, token);
         showToastSuccess('Gasto Pagado!', '');
@@ -107,7 +106,6 @@ export const ExpenseCard = ({item, deleteExpense, navigation}: Props) => {
                 item.tipo === 'FIJO' ? styles.nameTextFixed : styles.nameText
               }>
               {item.descripcion}
-              {item.id}
             </Text>
           </View>
           <View style={{flexDirection: 'row', gap: 20}}>

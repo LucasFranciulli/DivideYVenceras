@@ -76,36 +76,56 @@ export const ExpensesScreen = () => {
   const [groupList, setGroupList] = useState<GroupRequest[]>([]);
   const [currentGroup, setCurrentGroup] = useState<number>();
   const [showDropDownGroups, setShowDropDownGroups] = useState(false);
-  useEffect(() => {
-    const loadGroups = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (token) {
-          const myGroups = await getMyGroups(token);
-          setGroupList(myGroups);
-        }
-      } catch (error) {
-        console.error('Error loading groups:', error);
+  const loadGroups = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const myGroups = await getMyGroups(token);
+        setGroupList(myGroups);
       }
-    };
+    } catch (error) {
+      console.error('Error loading groups:', error);
+    }
+  };
+  const loadCategories = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      const categories = await getCategorias(token);
+      setCategoriesList(categories);
+    }
+  };
+  /* const loadTags = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      const tags = await getMyTags(token);
+      setTagList(tags);
+    }
+  }; */
+  const loadTags = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        if (currentGroup) {
+          const storedTags = await getMyTagsGroups(token, currentGroup);
+          if (storedTags !== undefined) {
+            setTagList(storedTags);
+          }
+        } else {
+          const storedTags = await getMyTags(token);
+          if (storedTags !== undefined) {
+            setTagList(storedTags);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading tags:', error);
+    }
+  };
+  useEffect(() => {
     loadGroups();
 
-    const loadCategories = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        const categories = await getCategorias(token);
-        setCategoriesList(categories);
-      }
-    };
     loadCategories();
 
-    const loadTags = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        const tags = await getMyTags(token);
-        setTagList(tags);
-      }
-    };
     loadTags();
   }, []);
 
@@ -157,11 +177,6 @@ export const ExpensesScreen = () => {
       return;
     }
 
-    /* const newTagItem = {
-      label: newTag,
-      value: newTag.toLowerCase(),
-    }; */
-
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
@@ -207,26 +222,7 @@ export const ExpensesScreen = () => {
     });
   };
 
-  const loadTags = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        if (currentGroup) {
-          const storedTags = await getMyTagsGroups(token, currentGroup);
-          if (storedTags !== undefined) {
-            setTagList(storedTags);
-          }
-        } else {
-          const storedTags = await getMyTags(token);
-          if (storedTags !== undefined) {
-            setTagList(storedTags);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error loading tags:', error);
-    }
-  };
+  
 
   useEffect(() => {
     setExpense({...expense, id_categoria: parseInt(currentCategory)});
@@ -238,11 +234,6 @@ export const ExpensesScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCategory]);
 
-  /*  useEffect(() => {
-    setExpense({...expense, tags: currentTag});
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTag]); */
   function formatDateToDDMMYYYY(date: Date): string {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');

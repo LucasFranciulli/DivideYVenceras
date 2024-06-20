@@ -80,7 +80,6 @@ export const divideGroupExpenses = async (id: number, token: string) => {
         },
       },
     );
-    console.log('result: ', result.data);
     return result.data.transacciones;
   } catch (error: any) {
     console.log('error: ', error);
@@ -98,7 +97,6 @@ export const payExpense = async (id: number, token: string) => {
         },
       },
     );
-    console.log('PAY result: ', result.data);
     return result.data;
   } catch (error: any) {
     console.log('error: ', error);

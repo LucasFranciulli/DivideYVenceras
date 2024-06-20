@@ -30,8 +30,6 @@ export const EditExpensesScreen = () => {
   const route = useRoute<EditExpensesScreenRouteProp>();
   const {item, navigation} = route.params;
 
-  console.log('ITEM A EDITAR: ', item);
-
   const [expense, setExpense] = useState<ExpenseRequest>({
     nombre: item.nombre,
     descripcion: item.descripcion,
@@ -87,9 +85,6 @@ export const EditExpensesScreen = () => {
       const tagsObtenidos = await getMyTags(token);
       const tagsSeteadas = transformTags(tagsObtenidos);
       setTagsList(tagsSeteadas);
-      console.log('categoriasSeteadas: ', categoriasSeteadas);
-      console.log('CATEGORIA QUE SE SETEO: ', categoryToEdit);
-      console.log('TAGS QUE SE SETEO: ', tagToEdit);
     }
   };
 
@@ -100,16 +95,8 @@ export const EditExpensesScreen = () => {
 
   const updateExpense = async () => {
     try {
-      /* const storedExpenses = await AsyncStorage.getItem('expenses');
-      const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
-
-      const expenseIndex = expenses.findIndex(
-        (exp: ExpenseRequest) => exp.nombre === item.nombre,
-      ); */
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        /* const categoryToEdit = await getCategory(expense.categoria, token);
-        const tagToEdit = await getTag(expense.tipo, token); */
         const expenseToEdit: ExpenseEdit = {
           nombre: expense.nombre,
           monto: Number(expense.monto),

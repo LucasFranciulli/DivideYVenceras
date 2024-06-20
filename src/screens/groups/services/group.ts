@@ -69,7 +69,6 @@ export const leaveGroup = async (groupId: number, token: string) => {
         },
       },
     );
-    console.log('salir de Grupo: ', response);
     return response.data.message === 'Usuario agregado al grupo correctamente';
   } catch (error: any) {
     console.log('error: ', error);

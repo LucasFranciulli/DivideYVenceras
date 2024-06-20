@@ -170,9 +170,6 @@ export const ProfileScreen = () => {
         setGroupExpensesFiltered(filteredGroup);
         break;
     }
-
-    console.log('personalExpenses: ', personalExpenses);
-    console.log('filteredPersonal: ', filteredPersonal);
   };
 
   return (

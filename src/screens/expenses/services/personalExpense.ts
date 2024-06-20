@@ -7,7 +7,6 @@ export const postExpensePersonal = async (
   token: string,
   type: string,
 ): Promise<string> => {
-  console.log("expense to add: ", expense);
   const response = await axios.post(
     `https://backenddycgestion-production.up.railway.app/api/gastos/${type}`,
     expense,
@@ -27,7 +26,6 @@ export const editExpensePersonal = async (
   token: string,
   id: number,
 ): Promise<string> => {
-  console.log("expense to edit: ", expense);
   const response = await axios.put(
     `https://backenddycgestion-production.up.railway.app/api/gastos/${id}`,
     expense,
